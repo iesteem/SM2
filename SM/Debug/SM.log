@@ -1,7 +1,6 @@
 ﻿  Operation.c
   main.c
   Sm2.c
-d:\project\vs2017\sm\sm\sm2.c(515): warning C4133: “函数”: 从“char *”到“big”的类型不兼容
   Sm3.c
   String.c
   正在生成代码...

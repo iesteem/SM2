@@ -62,8 +62,3 @@ big KDF(epoint*, int);				    //计算t
 void Decryption();					    //解密
 
 
-void MakeSign();                        //制作签名
-void VerifySign();                      //验证签名
-big CalculateE();                       //计算e
-big CalculateR();                       //计算r
-big CalculateS();                       //计算s
