@@ -111,7 +111,6 @@ void Decryption()
 	//printf("C1=%s\n\n", C1String);
 	//printf("C3=%s\n\n", C3String);
 	//printf("C2=%s\n\n", C2String);
-	free(ccode);
 
 	
 	/*
@@ -501,6 +500,155 @@ char* CalculateC3()
 
 
 
+/***********************
+	   制作签名
+***********************/
+void MakeSign() {
+	CalculateBKeys();		//产生公钥和私钥
+	VerifyBKeys();			//验证公钥和私钥
+	ReadInputFile();        //读取文件输入
+
+Restart:				//重新开始生成参数
+	InitRandomK();	    //初始化随机数
+
+	big r = mirvar(0);
+	r = CalculateR();
+	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
+	{
+		printf("r计算出错\n");
+		goto Restart;
+	}
+
+	big s = mirvar(0);
+	s = CalculateS();
+	if ((compare(s, mirvar(0)) == 0))
+	{
+		printf("s计算出错\n");
+		goto Restart;
+	}
+
+	/*
+	拼接字符串
+	*/
+	char *c = (char*)calloc(strlen(BigToHexChars2(r)) + strlen(BigToHexChars2(s)) + 1, sizeof(char)); //完整十六进制串分配内存
+	strcat(c, BigToHexChars2(r));  //strcat拼接时，c1String会覆盖c串的\0，保留c1String串的\0
+	strcat(c, BigToHexChars2(s));
+	signature = c;
+
+	printf("签名:\n%s\n\n", signature);  //签名
+
+}
+
+/*********************
+	   验证签名
+*********************/
+void VerifySign() {
+	//验证r
+	//验证s
+
+	/*
+	拆分签名
+	*/
+	char* Rstring = GetPartHexStr(signature, 0, lengthRS);
+	char* Sstring = GetPartHexStr(signature, strlen(signature) - lengthRS, lengthRS);
+	free(signature);
+	printf("r=%s\n\n", Rstring);
+	printf("s=%s\n\n", Sstring);
+
+	/*
+	求e
+	*/
+	big e = mirvar(0);
+	e = CalculateE();
+
+	/*
+	求t
+	*/
+	big t = mirvar(0);
+	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
+	if (compare(t, mirvar(0)) == 0)
+	{
+		printf("t为0\n");
+		system("pause");
+		exit(1);
+	}
+
+	/*
+	求R
+	*/
+	epoint* G = NewPoint(HexCharsToBig(Gx), HexCharsToBig(Gy));
+	epoint* PB = CalculatePB();  
+	epoint* point = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PB));
+
+	big x1 = mirvar(0);
+	x1 = PointX(point);
+	big R = mirvar(0);
+	R = Mod2(Add2(e, x1), HexCharsToBig(n));
+
+	printf("R=%s\n\n", BigToHexChars2(R));
+
+	if (compare(R, HexCharsToBig(Rstring)) == 0)
+	{
+		printf("签名正确\n");
+	}
+}
+
+/*
+计算Z
+*/
+big CalculateE() {
+	/*
+	拼接十六进制串
+	*/
+	char *c = (char*)calloc(strlen(ENTL) + strlen(ID) + strlen(a) + strlen(b) + strlen(Gx) + strlen(Gy) + strlen(BigToHexChars2(PBx)) + strlen(BigToHexChars2(PBy)) + 1, sizeof(char));  //完整十六进制串分配内存
+	strcat(c, ENTL);
+	strcat(c, ID);
+	strcat(c, a);
+	strcat(c, b);
+	strcat(c, Gx);
+	strcat(c, Gy);
+	strcat(c, BigToHexChars2(PBx));
+	strcat(c, BigToHexChars2(PBy));
+	char *cM = (char*)calloc(strlen(c) + strlen(ccode) + 1, sizeof(char));  //完整十六进制串分配内存
+	strcat(cM, c);  //strcat拼接时，c1String会覆盖c串的\0，保留c1String串的\0
+	strcat(cM, ccode);
+	big E = mirvar(0);
+	E = HexCharsToBig(SM3ByHexStr(cM));
+	return E;
+}
+
+/*
+计算r
+*/
+
+big CalculateR() {
+	epoint *point1 = CalculatePoint1();
+	big x1 = mirvar(0);
+	x1 = PointX(point1);
+	big E = mirvar(0);
+	E = CalculateE();
+	big r = mirvar(0);
+	r = Mod2(Add2(E, x1), HexCharsToBig(n));
+	return r;
+}
+
+
+/*
+计算s
+*/
+big CalculateS() {
+	big s = mirvar(0);
+
+	big t = mirvar(0);
+	t = Mod2(Xor2(Add2(DB, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2))), HexCharsToBig(n));
+	big r = mirvar(0);
+	r = CalculateR();
+	big m = mirvar(0);
+	m = Mod2(Sub2(k, Multiply2(r, DB)), HexCharsToBig(n));
+
+	s = Mod2(Multiply2(t, m), HexCharsToBig(n));
+	return s;
+}
 
 
 

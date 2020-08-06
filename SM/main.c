@@ -34,8 +34,8 @@ int main()
 	Encryption();
 	Decryption();
 
-	//MakeSign();
-	//VerifySign();
+	MakeSign();
+	VerifySign();
 
 	system("pause");
 	return 0;
