@@ -39,6 +39,7 @@ Restart:				//重新开始生成参数
 	char* c1String = CalculateC1();
 	char* c3String = CalculateC3();
 
+
 	//C2，将字符串形式转换成十六进制串
 	String *C2 = CalculateC2();
 	if (C2->size <= 0 && C2->data == NULL)	//t全零
@@ -76,8 +77,8 @@ Restart:				//重新开始生成参数
 	strcat(c, c3String);
 	strcat(c, c2String);
 	free(c1String); 
-	free(c2String);
 	free(c3String);
+	free(c2String);
 	ccode = c;  
 
 	printf("明文:\n%s\n\n", fileData.data);  //明文数据
@@ -93,13 +94,26 @@ void Decryption()
 {
     
 	/*
-	椭圆曲线点C1，C2
+	验证十六进制串C1是否满足椭圆曲线方程
 	*/
 	char* x1String = GetPartHexStr(ccode, 2, lengthC1x);  //字符串中4在十六进制串中表示为 “04”
 	char* y1String = GetPartHexStr(ccode, 2 + lengthC1x, lengthC1y);
+	big C1x = mirvar(0);
+	big C1y = mirvar(0);
+	C1x = HexCharsToBig(x1String);
+	C1y = HexCharsToBig(y1String);
+	if (!compare(Mod2(Pow2(C1y, 2), HexCharsToBig(p)), Mod2(Add2(Pow2(C1x, 3), Add2(Multiply2(C1x, HexCharsToBig(a)), HexCharsToBig(b))), HexCharsToBig(p))))		// if((PBy^2 %p) != ((PBx^3 + a*PBx +b)%p))
+	{
+		printf("C1验证无效，请重启程序\n");
+		system("pause");
+		exit(1);
+	}
+
+	/*
+	椭圆曲线点C1，C2
+	*/
 	epoint* C1 = NewPoint(HexCharsToBig(x1String), HexCharsToBig(y1String));
 	epoint* C2 = MultiplyEpoint(DB, C1);	//求解 [DB]C1=(x2, y2)
-	//printf("point2=%s\n\n", ConvertStringAsHex(EpointToBytes(C2)));
 	epoint_free(C1);
 
 	/*
@@ -132,7 +146,7 @@ void Decryption()
 	C2Number = HexCharsToBig(C2String);
     char* mcode = BigToHexChars2(Xor2(C2Number, t));  
 	mirkill(C2Number);
-
+	
 	/*
 	拼接十六进制串：xmy = x2  ||  M'  ||  Y2
 	*/
@@ -152,6 +166,7 @@ void Decryption()
 	free(xmy);
 
 	printf("经验证，解密成功，明文十六进制串为:\n%s\n", mcode);
+
 
 	/*
 	将大数以字符串形式输出
@@ -300,19 +315,17 @@ char * CalculateC1()
 	*/
 	epoint *point1 = CalculatePoint1();
 
-	unsigned char *x = (unsigned char*)malloc(sizeof(unsigned char)*Max);
-	unsigned char *y = (unsigned char*)malloc(sizeof(unsigned char)*Max);
-	lengthC1x = big_to_bytes(0, PointX(point1), x, FALSE) * 2;
-	lengthC1y = big_to_bytes(0, PointY(point1), y, FALSE) * 2;  //字符个数 * 2 = 十六进制个数
+	unsigned char *x1 = (unsigned char*)malloc(sizeof(unsigned char)*Max);
+	unsigned char *y1 = (unsigned char*)malloc(sizeof(unsigned char)*Max);
+	lengthC1x = big_to_bytes(0, PointX(point1), x1, FALSE) * 2;
+	lengthC1y = big_to_bytes(0, PointY(point1), y1, FALSE) * 2;  //字符个数 * 2 = 十六进制个数
 
 	/*
 	椭圆曲线点-->字符串-->十六进制串
 	*/
 	String *result = EpointToBytes(point1);  //64字节的point1转65字节的result  
 	char* C1 = ConvertStringAsHex(result);  
-
 	epoint_free(point1);  //暂存变量被释放
-
 	return C1;
 }
 
@@ -352,7 +365,7 @@ String * CalculateC2()
 		{
 			tString[i] = 0;
 		}
-		lengthT = fileData.size;
+		lengthT = fileData.size;  //tString(t)的字符长度和fileData.size(M)的长度已经一致
 	}
 
 	result->data = (unsigned char*)malloc(sizeof(unsigned char)*lengthT);
@@ -360,7 +373,7 @@ String * CalculateC2()
 	{
 		result->data[i] = tString[i] ^ fileData.data[i];  //C2 = t ^ M ，以字符串形式进行运算
 	}
-	result->size = lengthT;  //C2的字符个数即t的字符个数
+	result->size = lengthT;  //将t的字符长度赋给C2的字符个数
 
 	free(tString);
 	mirkill(t);
@@ -375,8 +388,8 @@ big KDF(epoint* point2, int klen)
 {
 	unsigned char* xStr = (unsigned char*)malloc(sizeof(unsigned char)*Max);
 	unsigned char* yStr = (unsigned char*)malloc(sizeof(unsigned char)*Max);
-	int lengthX = big_to_bytes(0, PointX(point2), xStr, FALSE);  //大数x转换成字符串表示的字符数(字节数)
-	int lengthY = big_to_bytes(0, PointY(point2), yStr, FALSE);  //大数y转换成字符串表示的字符数(字节数)
+	int lengthX = big_to_bytes(0, PointX(point2), xStr, FALSE);  //字符个数
+	int lengthY = big_to_bytes(0, PointY(point2), yStr, FALSE);  //字符个数
 	free(xStr);
 	free(yStr);
 
@@ -460,21 +473,21 @@ char* CalculateC3()
 {
 	epoint *point2 = CalculatePoint2();
 
-	char* x = (char*)malloc(sizeof(char)*Max);
-	char* y = (char*)malloc(sizeof(char)*Max);
-	int lengthX = big_to_bytes(0, PointX(point2), x, FALSE);  //字符个数(字节数)
-	int lengthY = big_to_bytes(0, PointY(point2), y, FALSE);  //字符个数(字节数)
+	char* x2 = (char*)malloc(sizeof(char)*Max);
+	char* y2 = (char*)malloc(sizeof(char)*Max);
+	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE) * 2;  //十六进制个数
+	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE) * 2;  //十六进制个数
 
 	epoint_free(point2);//暂存变量被释放
 
 	/*
 	拼接十六进制串
 	*/
-	char* xmy = (char*)malloc(sizeof(char)*(lengthX * 2 + lengthY * 2 + fileData.size * 2 + 1));  //十六进制个数
+	char* xmy = (char*)malloc(sizeof(char)*(lengthX + lengthY + fileData.size * 2 + 1));  //十六进制个数
 	int i = 0;
 	for (int j = 0; j < lengthX; j++)
 	{
-		sprintf(&xmy[i], "%02x", (unsigned char)(x[j]));  //以16进制的格式输出unsigned char类型的数值,输出域宽为2,右对齐,不足的用字符0替代
+		sprintf(&xmy[i], "%02x", (unsigned char)(x2[j]));  //以16进制的格式输出unsigned char类型的数值,输出域宽为2,右对齐,不足的用字符0替代
 		i += 2;
 	}
 
@@ -486,15 +499,15 @@ char* CalculateC3()
 
 	for (int j = 0; j < lengthY; j++)
 	{
-		sprintf(&xmy[i], "%02x", (unsigned char)(y[j]));
+		sprintf(&xmy[i], "%02x", (unsigned char)(y2[j]));
 		i += 2;
 	}
 	xmy[i] = '\0';   //直接赋值，赋值时不包含\0
 
-	free(x);
-	free(y);
+	free(x2);
+	free(y2);
 
-	xmy = SM3ByHexStr(xmy);  //hash（x2||data||y2)，以十六进制串表示
+	xmy = SM3ByHexStr(xmy);  //SM3(x2||data||y2)，以十六进制串表示
 	return xmy;
 }
 
@@ -504,8 +517,6 @@ char* CalculateC3()
 	   制作签名
 ***********************/
 void MakeSign() {
-	CalculateBKeys();		//产生公钥和私钥
-	VerifyBKeys();			//验证公钥和私钥
 	ReadInputFile();        //读取文件输入
 
 Restart:				//重新开始生成参数
@@ -543,8 +554,6 @@ Restart:				//重新开始生成参数
 	   验证签名
 *********************/
 void VerifySign() {
-	//验证r
-	//验证s
 
 	/*
 	拆分签名
@@ -554,6 +563,9 @@ void VerifySign() {
 	free(signature);
 	printf("r=%s\n\n", Rstring);
 	printf("s=%s\n\n", Sstring);
+
+	//验证r
+	//验证s
 
 	/*
 	求e
@@ -568,16 +580,16 @@ void VerifySign() {
 	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
 	if (compare(t, mirvar(0)) == 0)
 	{
-		printf("t为0\n");
+		printf("t为0，验证不通过\n");
 		system("pause");
 		exit(1);
 	}
 
 	/*
-	求R
+	求R，存在问题！！！！！
 	*/
 	epoint* G = NewPoint(HexCharsToBig(Gx), HexCharsToBig(Gy));
-	epoint* PB = CalculatePB();  
+	epoint* PB = CalculatePB();  //PB未改变
 	epoint* point = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PB));
 
 	big x1 = mirvar(0);
@@ -589,12 +601,13 @@ void VerifySign() {
 
 	if (compare(R, HexCharsToBig(Rstring)) == 0)
 	{
-		printf("签名正确\n");
+		printf("验证通过\n");
 	}
+	printf("R与r不匹配，验证不通过\n");
 }
 
 /*
-计算Z
+计算E
 */
 big CalculateE() {
 	/*
@@ -623,12 +636,12 @@ big CalculateE() {
 
 big CalculateR() {
 	epoint *point1 = CalculatePoint1();
-	big x1 = mirvar(0);
-	x1 = PointX(point1);
+	big xx1 = mirvar(0);
+	xx1 = PointX(point1);
 	big E = mirvar(0);
 	E = CalculateE();
 	big r = mirvar(0);
-	r = Mod2(Add2(E, x1), HexCharsToBig(n));
+	r = Mod2(Add2(E, xx1), HexCharsToBig(n));
 	return r;
 }
 

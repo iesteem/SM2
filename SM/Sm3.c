@@ -39,8 +39,10 @@ big SM3(big input)
 	/*
 	填充
 	*/
-	l = 4 * numdig(input);							//返回input(B)中数字(十六进制)的个数 *4 ：即input所占二进制位的个数(十进制表示)
+	l = 8 * numdig(input);							//返回大数input的比特数
 	bTd(length, l);									//将input的长度用二进制表示，放到length数组中 :即用64位二进制数表示input的二进制长度
+
+
 	//消息input首先填充1
 	sftbit(input, 1, z);							//将一个大数左移1位
 	incr(z, 1, z);									//加1
@@ -65,6 +67,9 @@ big SM3(big input)
 		copy(z, input);
 		ll--;
 	}
+
+	
+	
 
 	/*
 	迭代压缩
@@ -106,6 +111,7 @@ char* SM3ByHexStr(char* input)
 
 	char* result = (char*)malloc(sizeof(char)*Max);
 	cotstr(resultNUmber, result);  //将签名结果resultNUmber转换成十六进制串
+
 	return result;
 }
 
