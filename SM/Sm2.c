@@ -22,14 +22,14 @@ char* Gy = "BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0";
 char* ID = "31323334353637383132333435363738";    //默认ID
 char* ENTL = "0080";                              //默认ENTL
 
-/*
-*********加密**********
+/***********************************
+*****************加密***************
 注释：整个加密过程使用同一个随机数k
-*/
+***********************************/
 void Encryption()
 {
 	CalculateBKeys();		//产生公钥和私钥
-	VerifyBKeys();			//验证公钥和私钥
+	VerifyKeys(PBx,PBy);	//验证公钥和私钥
 	ReadInputFile();        //读取文件输入
 
 Restart:				//重新开始生成参数
@@ -86,10 +86,10 @@ Restart:				//重新开始生成参数
 }
 
 
-/*
-*********解密**********
+/*********************************
+**************解密****************
 注释：不涉及随机数k
-*/
+*********************************/
 void Decryption()
 {
     
@@ -181,30 +181,31 @@ void Decryption()
 
 
 
-/*
+/***********************************
 产生随机数 a<= result <=b
-*/
+***********************************/
 big GetBigRandom(big a, big b)
 {
 	irand((unsigned)time(NULL));
+	//irand("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0");
 	big result = mirvar(0);
 	bigrand(Add2(Sub2(b, a), mirvar(1)), result);		// 0<= result <b-a+1
 	return Add2(result, a);							// a<= xxx <=b
 }
 
-/*
+/***********************************
 产生随机参数K
 注释：所得随机数存入全局变量k
-*/
+***********************************/
 void InitRandomK()
 {
-	k = mirvar(0);
+    k = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), k);	// 1<= k <= n-1
 }
 
-/*
+/***********************
 参数G
-*/
+***********************/
 epoint * CalculateG()
 {
 	epoint *G = (epoint*)malloc(sizeof(epoint));
@@ -213,9 +214,9 @@ epoint * CalculateG()
 	return G;
 }
 
-/*
+/***************************
 公钥PB(PBx,PBy)
-*/
+***************************/
 epoint *CalculatePB()
 {
 
@@ -225,10 +226,10 @@ epoint *CalculatePB()
 	return PB;
 }
 
-/*
+/**************************************
 产生公钥和私钥
 注释：所得结果存入全局变量PBX，PBy，DB
-*/
+**************************************/
 void CalculateBKeys()
 {
 	big dm = mirvar(0);
@@ -240,13 +241,13 @@ void CalculateBKeys()
 	DB = dm;           //所得私钥存入全局变量DB 
 }
 
-/*
+/************************************
 验证公钥和私钥
-注释：使用全局变量PBx，PBy进行运算
-*/
-int VerifyBKeys()
+注释：使用全局变量进行运算
+************************************/
+int VerifyKeys(big x,big y)
 {
-	if (!compare(Mod2(Pow2(PBy, 2), HexCharsToBig(p)), Mod2(Add2(Pow2(PBx, 3), Add2(Multiply2(PBx, HexCharsToBig(a)), HexCharsToBig(b))), HexCharsToBig(p))))		// if((PBy^2 %p) != ((PBx^3 + a*PBx +b)%p))
+	if (!compare(Mod2(Pow2(y, 2), HexCharsToBig(p)), Mod2(Add2(Pow2(x, 3), Add2(Multiply2(x, HexCharsToBig(a)), HexCharsToBig(b))), HexCharsToBig(p))))		// if((PBy^2 %p) != ((PBx^3 + a*PBx +b)%p))
 	{
 		printf("公钥验证无效，请重启程序\n");
 		system("pause");
@@ -256,28 +257,28 @@ int VerifyBKeys()
 	return 1;
 }
 
-/*
+/*************************************
 计算(x1,y1)
 注释：使用使用全局变量k进行运算
-*/
+*************************************/
 epoint *CalculatePoint1()
 {
 	return MultiplyEpoint(k, CalculateG());
 }
 
-/*
+/**********************************
 计算(x2,y2)
 注释：使用全局变量k进行运算
-*/
+**********************************/
 epoint *CalculatePoint2()
 {
 	return MultiplyEpoint(k, CalculatePB());
 }
 
-/*
+/************************************
 读取文件输入，字符串表示明文数据
 注释：内部运算结果存入全局变量
-*/
+************************************/
 void ReadInputFile()
 {
 	FILE *fp = fopen(inputFileName, "r");
@@ -304,10 +305,10 @@ void ReadInputFile()
 	fileData.size = dataSize;  //明文中字符的个数
 }
 
-/*
+/*******************************************
 计算C1 = [k]G，以十六进制串表示，占65字节
 注释：使用了全局变量随机数k
-*/
+*******************************************/
 char * CalculateC1()
 {
 	/*
@@ -329,10 +330,10 @@ char * CalculateC1()
 	return C1;
 }
 
-/*
+/*******************************
 计算C2，以字符串表示
 注释：使用了全局变量随机数k
-*/
+*******************************/
 String * CalculateC2()
 {
 	String *result = (String*)malloc(sizeof(String));
@@ -381,9 +382,9 @@ String * CalculateC2()
 	return result;
 }
 
-/*
+/***********************
 KDF函数，返回大数
-*/
+***********************/
 big KDF(epoint* point2, int klen)
 {
 	unsigned char* xStr = (unsigned char*)malloc(sizeof(unsigned char)*Max);
@@ -465,25 +466,27 @@ big KDF(epoint* point2, int klen)
 	return Ha;
 }
 
-/*
+/********************************
 计算C3，以十六进制串表示，占32字节
 注释：使用了全局变量随机数k
-*/
+********************************/
 char* CalculateC3()
 {
 	epoint *point2 = CalculatePoint2();
 
 	char* x2 = (char*)malloc(sizeof(char)*Max);
 	char* y2 = (char*)malloc(sizeof(char)*Max);
-	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE) * 2;  //十六进制个数
-	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE) * 2;  //十六进制个数
+	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE);  //十六进制个数
+	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE);  //十六进制个数
+
+	printf("lengthx2 = %d", lengthY);
 
 	epoint_free(point2);//暂存变量被释放
 
 	/*
 	拼接十六进制串
 	*/
-	char* xmy = (char*)malloc(sizeof(char)*(lengthX + lengthY + fileData.size * 2 + 1));  //十六进制个数
+	char* xmy = (char*)malloc(sizeof(char)*(lengthX*2 + lengthY*2 + fileData.size * 2 + 1));  //十六进制个数
 	int i = 0;
 	for (int j = 0; j < lengthX; j++)
 	{
@@ -514,10 +517,15 @@ char* CalculateC3()
 
 
 /***********************
-	   制作签名
+*******制作签名**********
 ***********************/
 void MakeSign() {
+
+	CalculateAKeys();		//产生公钥和私钥
+	VerifyKeys(PBx, PBy);	//验证公钥和私钥
 	ReadInputFile();        //读取文件输入
+	big e = mirvar(0);
+	e = CalculateE();
 
 Restart:				//重新开始生成参数
 	InitRandomK();	    //初始化随机数
@@ -606,6 +614,22 @@ void VerifySign() {
 	printf("R与r不匹配，验证不通过\n");
 }
 
+/**************************************
+产生公钥和私钥
+注释：所得结果存入全局变量PAX，PAy，DA
+**************************************/
+void CalculateAKeys()
+{
+	big dm = mirvar(0);
+	dm = GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1)));	        // 私钥	[1,n-1]
+	epoint* pm = epoint_init();
+	pm = MultiplyEpoint(dm, CalculateG());										// 公钥 
+	PAx = PointX(pm);  //所得公钥横坐标存入全局变量PAx
+	PAy = PointY(pm);  //所得公钥横坐标存入全局变量PAx
+	DA = dm;           //所得私钥存入全局变量DA 
+}
+
+
 /*
 计算E
 */
@@ -620,8 +644,8 @@ big CalculateE() {
 	strcat(c, b);
 	strcat(c, Gx);
 	strcat(c, Gy);
-	strcat(c, BigToHexChars2(PBx));
-	strcat(c, BigToHexChars2(PBy));
+	strcat(c, BigToHexChars2(PAx));
+	strcat(c, BigToHexChars2(PAy));
 	char *cM = (char*)calloc(strlen(c) + strlen(ccode) + 1, sizeof(char));  //完整十六进制串分配内存
 	strcat(cM, c);  //strcat拼接时，c1String会覆盖c串的\0，保留c1String串的\0
 	strcat(cM, ccode);

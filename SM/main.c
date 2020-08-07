@@ -14,6 +14,9 @@ big k;								//随机数
 big PBx;							//B公钥x
 big PBy;							//B公钥y
 big DB;								//B私钥
+big PAx;							//A公钥x
+big PAy;							//A公钥y
+big DA;								//A私钥
 
 int lengthC1x;						//C1的x长度
 int lengthC1y;						//C1的y长度
@@ -31,26 +34,12 @@ int main()
 {
 	mip = mirsys(500, Max);
 	ecurve_init(HexCharsToBig(a), HexCharsToBig(b), HexCharsToBig(p), MR_PROJECTIVE);	//初始化椭圆曲线内部参数
-	
-	ReadInputFile();        //读取文件输入
-	char* xmy = (char*)malloc(fileData.size * 2 + 1);  //十六进制个数
-	int i = 0;
-	for (int j = 0; j < fileData.size; j++)
-	{
-		sprintf(&xmy[i], "%02x", (unsigned char)(fileData.data[j]));
-		i += 2;
-	}
-	xmy[i] = '\0';   //直接赋值，赋值时不包含\0
-	xmy = SM3ByHexStr(xmy);  
-	printf("SM3=%s\n\n", xmy);
-	
 
-	//Encryption();
-	//Decryption();
-	
+	Encryption();
+	Decryption();
 
-	//MakeSign();
-	//VerifySign();
+	MakeSign();
+	VerifySign();
 
 	system("pause");
 	return 0;

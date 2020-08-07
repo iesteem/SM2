@@ -15,7 +15,10 @@ extern big k;						//随机数k，来自InitRandomK()
 
 extern big PBx;						//公钥x，来自CalculateBKeys()
 extern big PBy;						//公钥y，来自CalculateBKeys()
-extern big DB;						//私钥，来自CalculateBKeys()							
+extern big DB;						//私钥 ，来自CalculateBKeys()	
+extern big PAx;						//公钥x，来自CalculateAKeys()
+extern big PAy;						//公钥y，来自CalculateAKeys()
+extern big DA;						//私钥 ，来自CalculateAKeys()			
 
 extern char* p;						//给定参数
 extern char* a;						//给定参数
@@ -47,7 +50,8 @@ extern int lengthRS;                //签名中 r与s 的十六进制串长度
 big GetBigRandom(big, big);		        //产生随机数 a<= result <=b
 void InitRandomK();					    //产生随机参数K
 void CalculateBKeys();				    //产生公钥和私钥
-int VerifyBKeys();					    //验证公钥和私钥
+int VerifyKeys(big x, big y);			//验证公钥和私钥
+void CalculateAKeys();				    //产生公钥和私钥
 epoint *CalculateG();				    //自定义参数G
 epoint *CalculatePB();				    //公钥PB(PBx,PBy)
 void ReadInputFile();				    //读取文件输入
