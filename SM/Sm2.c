@@ -64,9 +64,9 @@ Restart:				//重新开始生成参数
 	printf("公钥x=%s\n\n", BigToHexChars2(PBx));
 	printf("公钥y=%s\n\n", BigToHexChars2(PBy));
 	printf("***************加密中间数据如下************\n");
-	printf("C1=%s\n\n", c1String);
-	printf("C3=%s\n\n", c3String);
-	printf("C2=%s\n\n", c2String);
+	printf("C1=%s\n", c1String);
+	printf("C3=%s\n", c3String);
+	printf("C2=%s\n", c2String);
 	
 
 	/*
@@ -224,6 +224,18 @@ epoint *CalculatePB()
 	PB = epoint_init();
 	epoint_set(PBx, PBy, 0, PB);
 	return PB;
+}
+
+/***************************
+公钥PA(PAx,PAy)
+***************************/
+epoint *CalculatePA()
+{
+
+	epoint *PA = (epoint*)malloc(sizeof(epoint));
+	PA = epoint_init();
+	epoint_set(PAx, PAy, 0, PA);
+	return PA;
 }
 
 /**************************************
@@ -479,8 +491,6 @@ char* CalculateC3()
 	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE);  //十六进制个数
 	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE);  //十六进制个数
 
-	printf("lengthx2 = %d", lengthY);
-
 	epoint_free(point2);//暂存变量被释放
 
 	/*
@@ -522,8 +532,7 @@ char* CalculateC3()
 void MakeSign() {
 
 	CalculateAKeys();		//产生公钥和私钥
-	VerifyKeys(PBx, PBy);	//验证公钥和私钥
-	ReadInputFile();        //读取文件输入
+	VerifyKeys(PAx, PAy);	//验证公钥和私钥
 	big e = mirvar(0);
 	e = CalculateE();
 
@@ -597,8 +606,8 @@ void VerifySign() {
 	求R，存在问题！！！！！
 	*/
 	epoint* G = NewPoint(HexCharsToBig(Gx), HexCharsToBig(Gy));
-	epoint* PB = CalculatePB();  //PB未改变
-	epoint* point = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PB));
+	epoint* PA = CalculatePA();  //PA未改变
+	epoint* point = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
 
 	big x1 = mirvar(0);
 	x1 = PointX(point);
@@ -660,28 +669,29 @@ big CalculateE() {
 
 big CalculateR() {
 	epoint *point1 = CalculatePoint1();
-	big xx1 = mirvar(0);
-	xx1 = PointX(point1);
+	big x1 = mirvar(0);
+	x1 = PointX(point1);
 	big E = mirvar(0);
 	E = CalculateE();
 	big r = mirvar(0);
-	r = Mod2(Add2(E, xx1), HexCharsToBig(n));
+	r = Mod2(Add2(E, x1), HexCharsToBig(n));
 	return r;
 }
 
 
 /*
-计算s
+计算s,*********************************************************8
 */
 big CalculateS() {
 	big s = mirvar(0);
 
 	big t = mirvar(0);
-	t = Mod2(Xor2(Add2(DB, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2))), HexCharsToBig(n));
+	t = Mod2(Xor2(Add2(DA, mirvar(1)), mirvar(-1)), HexCharsToBig(n));
+	//Sub2(HexCharsToBig(n), mirvar(2))
 	big r = mirvar(0);
 	r = CalculateR();
 	big m = mirvar(0);
-	m = Mod2(Sub2(k, Multiply2(r, DB)), HexCharsToBig(n));
+	m = Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n));
 
 	s = Mod2(Multiply2(t, m), HexCharsToBig(n));
 	return s;
