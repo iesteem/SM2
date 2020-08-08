@@ -680,22 +680,14 @@ big CalculateR() {
 
 
 /*
-计算s,*********************************************************8
+计算s*********************************************************
 */
 big CalculateS() {
-	big s = mirvar(0);
-
-	big t = mirvar(0);
-	t = Mod2(Xor2(Add2(DA, mirvar(1)), mirvar(-1)), HexCharsToBig(n));
-	//Sub2(HexCharsToBig(n), mirvar(2))
 	big r = mirvar(0);
 	r = CalculateR();
-	big m = mirvar(0);
-	m = Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n));
-
-	s = Mod2(Multiply2(t, m), HexCharsToBig(n));
+	big s = mirvar(0);
+	s = Mod2(Multiply2(Divide2(mirvar(1), Add2(DA, mirvar(1))), Sub2(k, Multiply2(r, DA))), HexCharsToBig(n));  //计算出错
 	return s;
 }
-
 
 
