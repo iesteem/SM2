@@ -6,7 +6,7 @@
 #include"Sm2.h"
 #include"String.h"
 
-int Max = 1200;
+int Max = 6000;
 miracl *mip;
 
 big k;								//随机数
@@ -32,14 +32,32 @@ String fileData;					//输入文件数据
 
 int main()
 {
-	mip = mirsys(500, Max);
+	mip = mirsys(1000, 16);
 	ecurve_init(HexCharsToBig(a), HexCharsToBig(b), HexCharsToBig(p), MR_PROJECTIVE);	//初始化椭圆曲线内部参数
 
 	Encryption();
 	Decryption();
 
-	MakeSign();
-	VerifySign();
+	/*
+	ReadInputFile();
+	printf("输入字符数据为:\n%s\n\n", fileData.data);  //读入数据正确
+	printf("输入字符个数为:\n%d\n\n", fileData.size);  //读入个数正确
+
+	char* sm3 = (char*)malloc(sizeof(char)*(fileData.size * 2 + 1));  //十六进制个数
+	int i = 0;
+	for (int j = 0; j < fileData.size; j++)
+	{
+		sprintf(&sm3[i], "%02x", (unsigned char)(fileData.data[j]));
+		i += 2;
+	}
+	sm3[i] = '\0';
+	printf("输入十六进制串数据为:\n%s\n\n", sm3);  //转化为十六进制串正确
+	sm3 = SM3ByHexStr(sm3);
+	printf("签名:\n%s\n\n", sm3);
+	*/
+
+	//MakeSign();
+	//VerifySign();
 
 	system("pause");
 	return 0;

@@ -29,4 +29,6 @@ big Sub2(big x, big y);        // x - y
 big Multiply2(big x, big y);   // x * y 
 big Divide2(big x, big y);     // x / y 
 big Mod2(big x, big y);        // x % y 
+big Mod(big x, big y, big z);  // x的y次方，再取余z
 big Pow2(big x, int y);	       // x ^ y(幂次)
+

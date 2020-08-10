@@ -11,7 +11,7 @@
 #include"Sm3.h"
 
 /*
-定义给定常量，以十六进制串表示
+定义给定常量，以十六进制串表示.  (大数以十六进制形式表示)
 */
 char* p = "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF";
 char* a = "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC";
@@ -60,13 +60,13 @@ Restart:				//重新开始生成参数
 	printf("Gy=%s\n", Gy);
 	printf("k=%s\n\n", BigToHexChars2(k));
 	printf("***************秘钥参数如下****************\n");
-	printf("私钥=%s\n\n", BigToHexChars2(DB));
-	printf("公钥x=%s\n\n", BigToHexChars2(PBx));
-	printf("公钥y=%s\n\n", BigToHexChars2(PBy));
+	printf("私钥=%s\n", BigToHexChars2(DB));
+	printf("公钥x=%s\n", BigToHexChars2(PBx));
+	printf("公钥y=%s\n", BigToHexChars2(PBy));
 	printf("***************加密中间数据如下************\n");
 	printf("C1=%s\n", c1String);
 	printf("C3=%s\n", c3String);
-	printf("C2=%s\n", c2String);
+	printf("C2=%s\n\n", c2String);
 	
 
 	/*
@@ -81,8 +81,8 @@ Restart:				//重新开始生成参数
 	free(c2String);
 	ccode = c;  
 
-	printf("明文:\n%s\n\n", fileData.data);  //明文数据
-	printf("密文：\n%s\n\n\n", ccode);       //密文数据
+	//printf("明文: \n%s\n\n\n", fileData.data);  //明文数据
+	printf("密文：\n%s\n\n\n", ccode);          //密文数据
 }
 
 
@@ -165,7 +165,9 @@ void Decryption()
 	}
 	free(xmy);
 
-	printf("经验证，解密成功，明文十六进制串为:\n%s\n", mcode);
+	printf("***************解密中间数据如下************\n");
+	printf("经解密，明文十六进制串为:\n%s\n\n", mcode);
+	//printf("SM3=%s\n\n\n\n", SM3ByHexStr(mcode));
 
 
 	/*
@@ -289,7 +291,7 @@ epoint *CalculatePoint2()
 
 /************************************
 读取文件输入，字符串表示明文数据
-注释：内部运算结果存入全局变量
+注释：输入内容以字符串形式存入全局变量fileData
 ************************************/
 void ReadInputFile()
 {
@@ -313,7 +315,7 @@ void ReadInputFile()
 	fclose(fp);
 	data[dataSize] = '\0';
 
-	fileData.data = data;  //以字符串形式存储明文数据
+	fileData.data = data;      //以字符串形式存储明文数据
 	fileData.size = dataSize;  //明文中字符的个数
 }
 
@@ -488,8 +490,8 @@ char* CalculateC3()
 
 	char* x2 = (char*)malloc(sizeof(char)*Max);
 	char* y2 = (char*)malloc(sizeof(char)*Max);
-	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE);  //十六进制个数
-	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE);  //十六进制个数
+	int lengthX = big_to_bytes(0, PointX(point2), x2, FALSE);  //字节个数
+	int lengthY = big_to_bytes(0, PointY(point2), y2, FALSE);  //字节个数
 
 	epoint_free(point2);//暂存变量被释放
 
@@ -680,14 +682,12 @@ big CalculateR() {
 
 
 /*
-计算s*********************************************************
+计算s*******?????????????????????????????
 */
 big CalculateS() {
 	big r = mirvar(0);
 	r = CalculateR();
 	big s = mirvar(0);
-	s = Mod2(Multiply2(Divide2(mirvar(1), Add2(DA, mirvar(1))), Sub2(k, Multiply2(r, DA))), HexCharsToBig(n));  //计算出错
+	s = Mod2(Multiply2(Mod(Add2(DA, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2)), HexCharsToBig(n)), Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n))), HexCharsToBig(n));  //计算出错
 	return s;
 }
-
-

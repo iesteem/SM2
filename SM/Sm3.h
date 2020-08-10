@@ -17,3 +17,4 @@ unsigned int P1(unsigned m);
 unsigned int TT(int j);
 unsigned int FF(int i, unsigned int a, unsigned int b, unsigned int c);
 unsigned int GG(int i, unsigned int a, unsigned int b, unsigned int c);
+

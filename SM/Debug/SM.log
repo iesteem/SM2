@@ -1,25 +1,2 @@
-﻿  Operation.c
-  main.c
-  Sm2.c
-  Sm3.c
-  String.c
-  正在生成代码...
-miracl.lib(mralloc.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mralloc.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrarth0.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrarth0.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrarth1.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrarth1.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrarth2.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrarth2.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrarth3.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrarth3.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrbits.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrbits.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrcore.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrcore.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrcurve.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrcurve.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrio1.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrio1.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrio2.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrio2.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrjack.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrjack.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrlucas.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrlucas.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrmonty.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrmonty.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrmuldv.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrmuldv.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrpower.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrpower.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrrand.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrrand.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrsroot.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrsroot.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
-miracl.lib(mrxgcd.obj) : warning LNK4099: 未找到 PDB“GetMiracalLib.pdb”(使用“miracl.lib(mrxgcd.obj)”或在“D:\Project\VS2017\SM\Debug\GetMiracalLib.pdb”中寻找)；正在链接对象，如同没有调试信息一样
+﻿  main.c
   SM.vcxproj -> D:\Project\VS2017\SM\Debug\SM.exe

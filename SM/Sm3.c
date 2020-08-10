@@ -2,9 +2,10 @@
 #include"miracl.h"
 #include"mirdef.h"
 #include"Sm3.h"
+#include"String.h"
 
 /*
-SM3签名过程
+SM3计算过程
 */
 big SM3(big input)
 {
@@ -13,20 +14,25 @@ big SM3(big input)
 	big x = mirvar(1);
 	big V = mirvar(0);
 	big one = mirvar(1);
-	unsigned int V0[8]; 						//V(0)为256比特初始值IV
+	unsigned int V0[8]; 		//V(0)为256比特初始值IV
 	big B[5];
-	int l;										//消息的长度
-	int ll = 63;
-	int length[64];								//消息长度的二进制表示 
-	int n; 										//迭代次数 
-	int i;										//for循环所用 
+	int MLength;				//消息的长度
+	int BLength = 63;           //0~63，总共填充64个值
+	int length[64];				//消息长度的二进制表示 
+	int n; 						//迭代次数 
+	int i;						//for循环所用 
 
+	/*
+	初始化B[]
+	*/
 	for (i = 0; i < 5; i++)
 	{
 		B[i] = mirvar(0);
-	}  //初始化大数数组
+	}  
 
-	//存储初始值IV
+	/*
+	初始值IV
+	*/
 	V0[0] = 0X7380166f;
 	V0[1] = 0X4914b2b9;
 	V0[2] = 0X172442d7;
@@ -37,37 +43,46 @@ big SM3(big input)
 	V0[7] = 0Xb0fb0e4e;
 
 	/*
-	填充
+	使用SM3ByHexStr时，输入为十六进制串。
+	此处大数input，由十六进制串转化而来
 	*/
-	l = 8 * numdig(input);							//返回大数input的比特数
-	bTd(length, l);									//将input的长度用二进制表示，放到length数组中 :即用64位二进制数表示input的二进制长度
+	MLength = 4*numdig(input);  
+	//printf("输入数据的比特个数= %d\n\n", MLength);
+	bTd(length, MLength);				//将input的长度用二进制表示，放到length数组中 :即用64位二进制数表示input的二进制长度
 
 
-	//消息input首先填充1
-	sftbit(input, 1, z);							//将一个大数左移1位
-	incr(z, 1, z);									//加1
+	/*
+	在大数input添加一个比特"1"
+	*/
+	sftbit(input, 1, z);				//将一个大数左移1位
+	incr(z, 1, z);						//加1
 	copy(z, input);
-	l++;
-	//再填充0 
-	while (l % 512 != 448)
+	MLength++;
+
+	/*
+	继续填充若干个"0" ，直到满足条件
+	*/
+	while (MLength % 512 != 448)
 	{
-		sftbit(input, 1, z);						//将一个大数左移n位，直到满足条件
+		sftbit(input, 1, z);	
 		copy(z, input);
-		l++;
+		MLength++;
 	}
-	//将length[]填充在input(已填充1000...)后面
-	while (ll >= 0)
+
+	//printf("填充1..00之后的结果= %s\n\n", BigToHexChars2(input));
+
+	//将逆序表示的length[]再按逆序填充在input(已填充1000...)后面
+	while (BLength >= 0)
 	{
 		sftbit(input, 1, z);						//将一个大数左移1位
 
-		if (length[ll] == 1)
+		if (length[BLength] == 1)
 		{
 			incr(z, 1, z);							//+1
 		}
 		copy(z, input);
-		ll--;
+		BLength--;
 	}
-
 	
 	
 
@@ -75,7 +90,7 @@ big SM3(big input)
 	迭代压缩
 	*/
 	expb2(512, x);									//2的512次方,结果存入x(B)	
-	n = (l + 64) / 512;								//将填充后的input按512bit分组所得分组个数 
+	n = (MLength + 64) / 512;								//将填充后的input按512bit分组所得分组个数 
 	//将输入按照512bit分组，存入大数数组B中
 	for (i = 0; i < n; i++)
 	{
@@ -105,7 +120,10 @@ char* SM3ByHexStr(char* input)
 {
 	mip->IOBASE = 16;  //置十六进制
 	big bigCodeNumber = mirvar(0);  //初始化大数
+	//int k = 0;
 	cinstr(bigCodeNumber, input);  //将十六进制表示的输入字符串input转换成大数
+	//printf("大数为:\n%d\n\n", k);  //转化为十六进制串正确
+	//printf("十六进制串转换为大数为:\n%s\n\n", BigToHexChars2(bigCodeNumber));  //转化为十六进制串正确
 	big resultNUmber = mirvar(0);  //初始化大数
 	copy(SM3(bigCodeNumber), resultNUmber);  //将大数形式的输入字符串经签名后得到的大数形式签名复制给resultNUmber(B)
 
@@ -116,7 +134,7 @@ char* SM3ByHexStr(char* input)
 }
 
 /*
-将输入的十进制整数用二进制表示，存储在数组a中
+将输入的十进制整数用二进制表示，按逆序存储在数组a中
 */
 void  bTd(int *a, int length)
 {
@@ -283,3 +301,17 @@ unsigned int GG(int i, unsigned int a, unsigned int b, unsigned int c)
 		return (a&b) | (~a&c);
 	}
 }
+
+/*
+ReadInputFile();
+char* sm3 = (char*)malloc(fileData.size * 2 + 1));
+int i = 0;
+for (int j = 0; j < fileData.size; j++)
+{
+	sprintf(&sm3[i], "%02x", (unsigned char)(fileData.data[j]));
+	i += 2;
+}
+sm3[i] = '\0';
+sm3 = SM3ByHexStr(sm3);
+printf("签名:\n%s\n\n", sm3);
+*/
