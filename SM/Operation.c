@@ -126,6 +126,37 @@ big Xor2(big x, big y)
 }
 
 /*
+x(B) 与 y(B)
+*/
+big And2(big x, big y)
+{
+	big result = mirvar(0);
+	unsigned char xString[1000];
+	unsigned char yString[1000];
+	int lengthX = big_to_bytes(0, x, xString, FALSE);  //将x(B)转换成字符串xString，从索引0开始，返回字符串的长度
+	int lengthY = big_to_bytes(0, y, yString, FALSE);
+
+	if (lengthX < lengthY)
+	{
+		for (int i = 0; i < lengthX; i++)
+		{
+			yString[lengthY - 1 - i] &= xString[lengthX - 1 - i];  //从最低位开始异或运算
+		}
+		bytes_to_big(lengthY, yString, result);  //将字符串yString的前lengthY个字符 转换成大数result
+	}
+	else
+	{
+		for (int i = 0; i < lengthY; i++)
+		{
+			xString[lengthX - 1 - i] &= yString[lengthY - 1 - i];
+		}
+		bytes_to_big(lengthX, xString, result);
+	}
+
+	return result;
+}
+
+/*
 x(B) + y(B)
 */
 big Add2(big x, big y)
@@ -221,4 +252,3 @@ big Pow2(big x, int y)
 	mirkill(x1);
 	return y1;
 }
-

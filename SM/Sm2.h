@@ -54,6 +54,7 @@ int VerifyKeys(big x, big y);			//验证公钥和私钥
 void CalculateAKeys();				    //产生公钥和私钥
 epoint *CalculateG();				    //自定义参数G
 epoint *CalculatePB();				    //公钥PB(PBx,PBy)
+epoint *CalculatePA();				    //公钥PA(PAx,PAy)
 void ReadInputFile();				    //读取文件输入
 
 void Encryption();					    //加密
@@ -68,5 +69,15 @@ void Decryption();					    //解密
 void MakeSign();                        //制作签名
 void VerifySign();                      //验证签名
 big CalculateE();                       //计算e
-big CalculateR();                       //计算r
-big CalculateS();                       //计算s
+
+void ExchangeKey();                     //密钥交换
+epoint *CalculatePointR(big r);         //计算R
+big CalculateXX(big x);				    //计算xx
+big CalculateT(big d, big xx, big r);   //计算t
+epoint *CalculateU(big t, epoint *P, big x, epoint *R);   //计算t
+char* CalculateZ(char* ENTL, char* ID,
+	  char* pointX, char* pointY);                        //计算Z
+big CalculateK(big x, big y, char* ZA, char* ZB);         //计算K
+char* CalculateH(char* ux, char* ZA, char* ZB,
+	  char* x1, char* y1, char* x2, char* y2);            //计算H
+char* CalculateS(char* m, char* ux, char* h);             //计算S

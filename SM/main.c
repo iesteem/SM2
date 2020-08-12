@@ -56,8 +56,8 @@ int main()
 	printf("Ç©Ãû:\n%s\n\n", sm3);
 	*/
 
-	//MakeSign();
-	//VerifySign();
+	MakeSign();
+	VerifySign();
 
 	system("pause");
 	return 0;

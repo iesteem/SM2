@@ -2,6 +2,7 @@
 #include"Sm2.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<math.h>
 #include<time.h>
 #include<string.h>
 #include"Operation.h"
@@ -60,9 +61,9 @@ Restart:				//重新开始生成参数
 	printf("Gy=%s\n", Gy);
 	printf("k=%s\n\n", BigToHexChars2(k));
 	printf("***************秘钥参数如下****************\n");
-	printf("私钥=%s\n", BigToHexChars2(DB));
+	printf("私钥 =%s\n", BigToHexChars2(DB));
 	printf("公钥x=%s\n", BigToHexChars2(PBx));
-	printf("公钥y=%s\n", BigToHexChars2(PBy));
+	printf("公钥y=%s\n\n", BigToHexChars2(PBy));
 	printf("***************加密中间数据如下************\n");
 	printf("C1=%s\n", c1String);
 	printf("C3=%s\n", c3String);
@@ -82,7 +83,7 @@ Restart:				//重新开始生成参数
 	ccode = c;  
 
 	//printf("明文: \n%s\n\n\n", fileData.data);  //明文数据
-	printf("密文：\n%s\n\n\n", ccode);          //密文数据
+	printf("密文：\n%s\n\n", ccode);              //密文数据
 }
 
 
@@ -531,18 +532,24 @@ char* CalculateC3()
 /***********************
 *******制作签名**********
 ***********************/
-void MakeSign() {
+void MakeSign() 
+{
 
 	CalculateAKeys();		//产生公钥和私钥
 	VerifyKeys(PAx, PAy);	//验证公钥和私钥
+	printf("***************签名中间数据如下************\n");
 	big e = mirvar(0);
 	e = CalculateE();
 
 Restart:				//重新开始生成参数
 	InitRandomK();	    //初始化随机数
 
+	epoint *point1 = CalculatePoint1();
+	big x1 = mirvar(0);
+	x1 = PointX(point1);
 	big r = mirvar(0);
-	r = CalculateR();
+	r = Mod2(Add2(e, x1), HexCharsToBig(n));
+	mirkill(x1);
 	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
 	{
 		printf("r计算出错\n");
@@ -550,7 +557,7 @@ Restart:				//重新开始生成参数
 	}
 
 	big s = mirvar(0);
-	s = CalculateS();
+	s = Mod2(Multiply2(Mod(Add2(DA, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2)), HexCharsToBig(n)), Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n))), HexCharsToBig(n));  //计算出错
 	if ((compare(s, mirvar(0)) == 0))
 	{
 		printf("s计算出错\n");
@@ -572,7 +579,8 @@ Restart:				//重新开始生成参数
 /*********************
 	   验证签名
 *********************/
-void VerifySign() {
+void VerifySign() 
+{
 
 	/*
 	拆分签名
@@ -603,16 +611,18 @@ void VerifySign() {
 		system("pause");
 		exit(1);
 	}
+	printf("t=%s\n", BigToHexChars2(t));
 
 	/*
 	求R，存在问题！！！！！
 	*/
+
 	epoint* G = NewPoint(HexCharsToBig(Gx), HexCharsToBig(Gy));
-	epoint* PA = CalculatePA();  //PA未改变
-	epoint* point = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
+	epoint* PA = CalculatePA();
+	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
 
 	big x1 = mirvar(0);
-	x1 = PointX(point);
+	x1 = PointX(point1);
 	big R = mirvar(0);
 	R = Mod2(Add2(e, x1), HexCharsToBig(n));
 
@@ -624,6 +634,7 @@ void VerifySign() {
 	}
 	printf("R与r不匹配，验证不通过\n");
 }
+	
 
 /**************************************
 产生公钥和私钥
@@ -644,7 +655,8 @@ void CalculateAKeys()
 /*
 计算E
 */
-big CalculateE() {
+big CalculateE() 
+{
 	/*
 	拼接十六进制串
 	*/
@@ -665,29 +677,216 @@ big CalculateE() {
 	return E;
 }
 
-/*
-计算r
-*/
 
-big CalculateR() {
-	epoint *point1 = CalculatePoint1();
+void ExchangeKey() 
+{
+	//求PA,PB
+	epoint* PA = epoint_init();
+	PA = CalculatePA();	
+	epoint* PB = epoint_init();
+	PB = CalculatePB();
+
+	//A.1
+	big ra = mirvar(0);
+	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), ra);
+	//A.2
+	epoint* RA = epoint_init();
+	RA = MultiplyEpoint(ra, CalculateG());
+	//B.1
+	big rb = mirvar(0);
+	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), rb);
+	//B.2
+	epoint* RB = epoint_init();
+	RB = MultiplyEpoint(rb, CalculateG());
+    //B.3
+	big x2 = mirvar(0);
+	x2 = PointX(RB);
+	big xx2 = mirvar(0);
+	xx2 = CalculateXX(x2);
+	//B.4
+	big tB = mirvar(0);
+	tB = CalculateT(DB, xx2, rb);
+	VerifyKeys(PointX(RA), PointY(RA));
+	//A.4
 	big x1 = mirvar(0);
-	x1 = PointX(point1);
-	big E = mirvar(0);
-	E = CalculateE();
-	big r = mirvar(0);
-	r = Mod2(Add2(E, x1), HexCharsToBig(n));
-	return r;
+	x1 = PointX(RA);
+	big xx1 = mirvar(0);
+	xx1 = CalculateXX(x1);
+	//A.5
+	big tA = mirvar(0);
+	tA = CalculateT(DA, xx1, ra);
+	VerifyKeys(PointX(RB), PointY(RB));
+	//B.6
+	epoint* V = epoint_init();
+	V = CalculateU(tB, PA, xx1, RA);
+	big v = mirvar(0);
+	v = HexCharsToBig(ConvertStringAsHex(EpointToBytes(V)));
+	if (compare(v, mirvar(0)) == 0)
+	{
+		printf("计算错误\n");
+		system("pause");
+		exit(3);
+	}
+	//B.7
+	char* IDA = "31323334353637383132333435363738";    //默认ID
+	char* ENTLA = "0080";                              //默认ENTL
+	char* ZA = CalculateZ(ENTLA, IDA, BigToHexChars2(PAx), BigToHexChars2(PAy));
+	char* IDB = "31323334353637383132333435363738";    //默认ID
+	char* ENTLB = "0080";                              //默认ENTL
+	char* ZB = CalculateZ(ENTLB, IDB, BigToHexChars2(PBx), BigToHexChars2(PBy));
+	big vx = mirvar(0);
+	vx = PointX(V);
+	big vy = mirvar(0);
+	vy = PointY(V);
+	big KB = mirvar(0);
+	KB = CalculateK(vx, vy, ZA, ZB);
+	//B.8
+	big y1 = mirvar(0);
+	y1 = PointY(RA);
+	big y2 = mirvar(0);
+	y2 = PointY(RB);
+	char* hv = CalculateH(BigToHexChars2(vx), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
+	char* b = "02";
+	char* SB = CalculateS(b, BigToHexChars2(vy), hv);
+	//A.7
+	epoint* U = epoint_init();
+	U = CalculateU(tA, PB, xx2, RB);
+	big u = mirvar(0);
+	u = HexCharsToBig(ConvertStringAsHex(EpointToBytes(U)));
+	if (compare(u, mirvar(0)) == 0)
+	{
+		printf("计算错误\n");
+		system("pause");
+		exit(3);
+	}
+	//A.8
+	big ux = mirvar(0);
+	ux = PointX(U);
+	big uy = mirvar(0);
+	uy = PointY(U);
+	big KA = mirvar(0);
+	KA = CalculateK(ux, uy, ZA, ZB);
+	//A.9
+	char* hu = CalculateH(BigToHexChars2(ux), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
+	char* S1 = CalculateS(b, BigToHexChars2(vy), hu);
+	if (compare(HexCharsToBig(S1), HexCharsToBig(SB)) != 0)
+	{
+		printf("计算错误\n");
+		system("pause");
+		exit(3);
+	}
+	//A.10
+	char* c = "03";
+	char* SA = CalculateS(c, BigToHexChars2(uy), hu);
+	//B.10
+	char* S2 = CalculateS(c, BigToHexChars2(vy), hv);
+	if (compare(HexCharsToBig(S2), HexCharsToBig(SA)) != 0)
+	{
+		printf("计算错误\n");
+		system("pause");
+		exit(3);
+	}
 }
 
+/*
+计算Z
+*/
+char* CalculateZ(char* ENTL, char* ID, char* pointX, char* pointY)
+{
+	char *z = (char*)calloc(strlen(ENTL) + strlen(ID) + strlen(a) + strlen(b) + strlen(Gx) + strlen(Gy) + strlen(pointX) + strlen(pointY) + 1, sizeof(char));
+	strcat(z, ENTL);
+	strcat(z, ID);
+	strcat(z, a);
+	strcat(z, b);
+	strcat(z, Gx);
+	strcat(z, Gy);
+	strcat(z, pointX);
+	strcat(z, pointY);
+	return z;
+}
+
+/*************************************
+计算R=r*G
+*************************************/
+epoint *CalculatePointR(big r)
+{
+	return MultiplyEpoint(r, CalculateG());
+}
+
+/**********************************
+计算2^w + (x & (2^w - 1))
+**********************************/
+big CalculateXX(big x) 
+{
+	double w1 = (logb2(HexCharsToBig(n)) / 2);
+	int w2 = (int)w1 - 1;
+	double precious = 0.0, inter = 0;
+	precious = modf(w1, &inter);
+	if (precious > 0.0)  w2 = w2 + 1;
+	big W = mirvar(0);
+	expb2(w2, W);
+	return Add2(W , And2(x, Sub2(W, mirvar(1))));
+}
+
+/**********************************
+计算d + xx * r
+**********************************/
+big CalculateT(big d,big xx, big r) 
+{
+	return Mod2(Add2(d, Multiply2(xx, r)), HexCharsToBig(n));
+}
+
+/**********************************
+计算t * (P + (x * R))
+**********************************/
+epoint *CalculateU(big t, epoint *P, big x, epoint *R)
+{
+	return MultiplyEpoint(t, AddEpoint(P, MultiplyEpoint(x, R)));
+}
 
 /*
-计算s*******?????????????????????????????
+计算KDF(x || y || ZA || ZB,klen)
 */
-big CalculateS() {
-	big r = mirvar(0);
-	r = CalculateR();
-	big s = mirvar(0);
-	s = Mod2(Multiply2(Mod(Add2(DA, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2)), HexCharsToBig(n)), Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n))), HexCharsToBig(n));  //计算出错
+big CalculateK(big x, big y, char* ZA, char* ZB)
+{
+	char* XY = (char*)calloc(strlen(BigToHexChars2(x)) + strlen(BigToHexChars2(y)) + 1, sizeof(char));
+	strcat(XY, BigToHexChars2(x));
+	strcat(XY, BigToHexChars2(y));
+	char* Z = (char*)calloc(strlen(ZA) + strlen(ZB) + 1, sizeof(char));
+	strcat(Z, ZA);
+	strcat(Z, ZB);
+	epoint* p = NewPoint(HexCharsToBig(ZA), HexCharsToBig(ZB));
+	big k = mirvar(0);
+	k = KDF(p, 32);
+	return k;
+}
+
+/*
+计算Hash(ux || ZA || ZB || x1 || x2 || y1 || y2)
+*/
+char* CalculateH(char* ux, char* ZA, char* ZB, char* x1, char* y1, char* x2, char* y2)
+{
+	char* h = (char*)calloc(strlen(ux) + strlen(ZA) + strlen(ZB) + strlen(x1) + strlen(y1) + strlen(x2) + strlen(y2) + 1, sizeof(char));
+	strcat(h, ux);
+	strcat(h, ZA);
+	strcat(h, ZB);
+	strcat(h, x1);
+	strcat(h, y1);
+	strcat(h, x2);
+	strcat(h, y2);
+	h = SM3ByHexStr(h);
+	return h;
+}
+
+/*
+计算Hash(m || ux || h)
+*/
+char* CalculateS(char* m, char* ux, char* h)
+{
+	char* s = (char*)calloc(strlen(m) + strlen(ux) + strlen(h) + 1, sizeof(char));
+	strcat(s, m);
+	strcat(s, ux);
+	strcat(s, h);
+	s = SM3ByHexStr(s);
 	return s;
 }

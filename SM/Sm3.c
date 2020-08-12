@@ -301,17 +301,3 @@ unsigned int GG(int i, unsigned int a, unsigned int b, unsigned int c)
 		return (a&b) | (~a&c);
 	}
 }
-
-/*
-ReadInputFile();
-char* sm3 = (char*)malloc(fileData.size * 2 + 1));
-int i = 0;
-for (int j = 0; j < fileData.size; j++)
-{
-	sprintf(&sm3[i], "%02x", (unsigned char)(fileData.data[j]));
-	i += 2;
-}
-sm3[i] = '\0';
-sm3 = SM3ByHexStr(sm3);
-printf("Ç©Ãû:\n%s\n\n", sm3);
-*/
