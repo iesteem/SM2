@@ -534,17 +534,19 @@ char* CalculateC3()
 ***********************/
 void MakeSign() 
 {
-
+	//预处理
 	CalculateAKeys();		//产生公钥和私钥
 	VerifyKeys(PAx, PAy);	//验证公钥和私钥
 	printf("***************签名中间数据如下************\n");
+	//1.+2.
 	big e = mirvar(0);
 	e = CalculateE();
-
-Restart:				//重新开始生成参数
+Restart:
+	//3.
 	InitRandomK();	    //初始化随机数
-
+	//4.
 	epoint *point1 = CalculatePoint1();
+	//5.
 	big x1 = mirvar(0);
 	x1 = PointX(point1);
 	big r = mirvar(0);
@@ -555,9 +557,15 @@ Restart:				//重新开始生成参数
 		printf("r计算出错\n");
 		goto Restart;
 	}
-
+	//6. 8********************************************************************************************
+	big s1 = mirvar(0);
+	big yd = mirvar(0);
+	xgcd(Add2(mirvar(1), DA), HexCharsToBig(n), s1, yd, mirvar(1));
+	//printf("s1=%s\n", BigToHexChars2(s1));
+	big s2 = mirvar(0);
+	s2 = Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n));
 	big s = mirvar(0);
-	s = Mod2(Multiply2(Mod(Add2(DA, mirvar(1)), Sub2(HexCharsToBig(n), mirvar(2)), HexCharsToBig(n)), Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n))), HexCharsToBig(n));  //计算出错
+	s = Mod2(Multiply2(s1, s2), HexCharsToBig(n));
 	if ((compare(s, mirvar(0)) == 0))
 	{
 		printf("s计算出错\n");
@@ -581,28 +589,34 @@ Restart:				//重新开始生成参数
 *********************/
 void VerifySign() 
 {
-
 	/*
 	拆分签名
 	*/
 	char* Rstring = GetPartHexStr(signature, 0, lengthRS);
 	char* Sstring = GetPartHexStr(signature, strlen(signature) - lengthRS, lengthRS);
 	free(signature);
-	printf("r=%s\n\n", Rstring);
-	printf("s=%s\n\n", Sstring);
+	//printf("r=%s\n\n", Rstring);
+	//printf("s=%s\n\n", Sstring);
 
-	//验证r
-	//验证s
+	int r = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
+	if (r != (-1))
+	{
+		printf("r验证不通过\n");
+		system("pause");
+		exit(1);
+	}
+	int s = compare(HexCharsToBig(Sstring), HexCharsToBig(n));
+	if (s != (-1))
+	{
+		printf("s验证不通过\n");
+		system("pause");
+		exit(1);
+	}
 
-	/*
-	求e
-	*/
+	//3.+4.
 	big e = mirvar(0);
 	e = CalculateE();
-
-	/*
-	求t
-	*/
+	//5.
 	big t = mirvar(0);
 	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
 	if (compare(t, mirvar(0)) == 0)
@@ -611,28 +625,11 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
-	printf("t=%s\n", BigToHexChars2(t));
-
-	/*
-	求R，存在问题！！！！！
-	*/
-
-	epoint* G = NewPoint(HexCharsToBig(Gx), HexCharsToBig(Gy));
+	//printf("t=%s\n", BigToHexChars2(t));
+    //6.
+	epoint* G = CalculateG();
 	epoint* PA = CalculatePA();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
-
-	big x1 = mirvar(0);
-	x1 = PointX(point1);
-	big R = mirvar(0);
-	R = Mod2(Add2(e, x1), HexCharsToBig(n));
-
-	printf("R=%s\n\n", BigToHexChars2(R));
-
-	if (compare(R, HexCharsToBig(Rstring)) == 0)
-	{
-		printf("验证通过\n");
-	}
-	printf("R与r不匹配，验证不通过\n");
 }
 	
 
@@ -681,10 +678,8 @@ big CalculateE()
 void ExchangeKey() 
 {
 	//求PA,PB
-	epoint* PA = epoint_init();
-	PA = CalculatePA();	
-	epoint* PB = epoint_init();
-	PB = CalculatePB();
+	epoint* PA = CalculatePA();	
+	epoint* PB = CalculatePB();
 
 	//A.1
 	big ra = mirvar(0);
@@ -825,7 +820,9 @@ big CalculateXX(big x)
 	if (precious > 0.0)  w2 = w2 + 1;
 	big W = mirvar(0);
 	expb2(w2, W);
-	return Add2(W , And2(x, Sub2(W, mirvar(1))));
+	big xx = mirvar(0);
+	xx = Add2(W , And2(x, Sub2(W, mirvar(1))));
+	return xx;
 }
 
 /**********************************
@@ -833,7 +830,9 @@ big CalculateXX(big x)
 **********************************/
 big CalculateT(big d,big xx, big r) 
 {
-	return Mod2(Add2(d, Multiply2(xx, r)), HexCharsToBig(n));
+	big t = mirvar(0);
+    t = Mod2(Add2(d, Multiply2(xx, r)), HexCharsToBig(n));
+	return t;
 }
 
 /**********************************

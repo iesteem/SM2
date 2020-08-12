@@ -38,6 +38,7 @@ int main()
 	Encryption();
 	Decryption();
 
+
 	/*
 	ReadInputFile();
 	printf("输入字符数据为:\n%s\n\n", fileData.data);  //读入数据正确

@@ -219,25 +219,6 @@ big Mod2(big x, big y)
 }
 
 /*
-x(B)的y(B)次方，再对z(B)取余
-*/
-big Mod(big x, big y, big z)
-{
-	big x1 = mirvar(0);
-	big y1 = mirvar(0);
-	big z1 = mirvar(0);
-	big t1 = mirvar(0);
-	copy(x, x1);
-	copy(y, y1);
-	copy(z, z1);
-	powmod(x1, y1, z1, t1);  //令 x1(B)的1(B)次方 mod y1(B), 结果赋给result(B)
-	mirkill(x1);
-	mirkill(y1);
-	mirkill(z1);
-	return t1;
-}
-
-/*
 x(B)的y次方
 */
 big Pow2(big x, int y)

@@ -21,7 +21,7 @@ big PointY(epoint*);
 String* EpointToBytes(epoint *);  //字符串结构首字节为04h
 
 /*
-大数运算
+大数运算,十六进制
 */
 big Xor2(big x, big y);        // x ^ y（异或）
 big And2(big x, big y);        // x & y（与）
@@ -30,9 +30,5 @@ big Sub2(big x, big y);        // x - y
 big Multiply2(big x, big y);   // x * y 
 big Divide2(big x, big y);     // x / y 
 big Mod2(big x, big y);        // x % y 
-big Mod(big x, big y, big z);  // x的y次方，再取余z
 big Pow2(big x, int y);	       // x ^ y(幂次)
 
-/*
-其他运算
-*/
