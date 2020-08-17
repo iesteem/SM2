@@ -190,7 +190,6 @@ void Decryption()
 big GetBigRandom(big a, big b)
 {
 	irand((unsigned)time(NULL));
-	//irand("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0");
 	big result = mirvar(0);
 	bigrand(Add2(Sub2(b, a), mirvar(1)), result);		// 0<= result <b-a+1
 	return Add2(result, a);							// a<= xxx <=b
@@ -268,7 +267,6 @@ int VerifyKeys(big x,big y)
 		system("pause");
 		exit(1);
 	}
-	printf("公钥验证有效!\n\n");
 	return 1;
 }
 
@@ -541,6 +539,7 @@ void MakeSign()
 	//1.+2.
 	big e = mirvar(0);
 	e = CalculateE();
+	//printf("e = %s\n", BigToHexChars2(e));
 Restart:
 	//3.
 	InitRandomK();	    //初始化随机数
@@ -551,6 +550,7 @@ Restart:
 	x1 = PointX(point1);
 	big r = mirvar(0);
 	r = Mod2(Add2(e, x1), HexCharsToBig(n));
+	//printf("r = %s\n", BigToHexChars2(r));
 	mirkill(x1);
 	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
 	{
@@ -576,7 +576,7 @@ Restart:
 	拼接字符串
 	*/
 	char *c = (char*)calloc(strlen(BigToHexChars2(r)) + strlen(BigToHexChars2(s)) + 1, sizeof(char)); //完整十六进制串分配内存
-	strcat(c, BigToHexChars2(r));  //strcat拼接时，c1String会覆盖c串的\0，保留c1String串的\0
+	strcat(c, BigToHexChars2(r));
 	strcat(c, BigToHexChars2(s));
 	signature = c;
 
@@ -598,6 +598,7 @@ void VerifySign()
 	//printf("r=%s\n\n", Rstring);
 	//printf("s=%s\n\n", Sstring);
 
+	//1.
 	int r = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
 	if (r != (-1))
 	{
@@ -605,6 +606,7 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
+	//2.
 	int s = compare(HexCharsToBig(Sstring), HexCharsToBig(n));
 	if (s != (-1))
 	{
@@ -616,20 +618,32 @@ void VerifySign()
 	//3.+4.
 	big e = mirvar(0);
 	e = CalculateE();
+	printf("e = %s\n", BigToHexChars2(e));
 	//5.
 	big t = mirvar(0);
 	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
+	printf("t = %s\n", BigToHexChars2(t));
 	if (compare(t, mirvar(0)) == 0)
 	{
 		printf("t为0，验证不通过\n");
 		system("pause");
 		exit(1);
 	}
-	//printf("t=%s\n", BigToHexChars2(t));
     //6.
 	epoint* G = CalculateG();
 	epoint* PA = CalculatePA();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
+	//7.
+	big x1 = mirvar(0);
+	x1 = PointX(point1);
+	big R = mirvar(0);
+	R = Mod2(Add2(e, x1), HexCharsToBig(n));;
+	if (compare(R, HexCharsToBig(Rstring)) != 0)
+	{
+		printf("验证部分R与制作部分r不相同，验证不通过\n");
+		system("pause");
+		exit(1);
+	}
 }
 	
 
@@ -647,7 +661,6 @@ void CalculateAKeys()
 	PAy = PointY(pm);  //所得公钥横坐标存入全局变量PAx
 	DA = dm;           //所得私钥存入全局变量DA 
 }
-
 
 /*
 计算E
@@ -677,7 +690,9 @@ big CalculateE()
 
 void ExchangeKey() 
 {
-	//求PA,PB
+	//预处理：求PA,PB
+	CalculateAKeys();
+	CalculateBKeys();
 	epoint* PA = CalculatePA();	
 	epoint* PB = CalculatePB();
 
@@ -685,14 +700,12 @@ void ExchangeKey()
 	big ra = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), ra);
 	//A.2
-	epoint* RA = epoint_init();
-	RA = MultiplyEpoint(ra, CalculateG());
+	epoint* RA = MultiplyEpoint(ra, CalculateG());
 	//B.1
 	big rb = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), rb);
 	//B.2
-	epoint* RB = epoint_init();
-	RB = MultiplyEpoint(rb, CalculateG());
+	epoint* RB = MultiplyEpoint(rb, CalculateG());
     //B.3
 	big x2 = mirvar(0);
 	x2 = PointX(RB);
@@ -712,13 +725,12 @@ void ExchangeKey()
 	tA = CalculateT(DA, xx1, ra);
 	VerifyKeys(PointX(RB), PointY(RB));
 	//B.6
-	epoint* V = epoint_init();
-	V = CalculateU(tB, PA, xx1, RA);
+	epoint* V = CalculateU(tB, PA, xx1, RA);
 	big v = mirvar(0);
 	v = HexCharsToBig(ConvertStringAsHex(EpointToBytes(V)));
 	if (compare(v, mirvar(0)) == 0)
 	{
-		printf("计算错误\n");
+		printf("V计算错误\n");
 		system("pause");
 		exit(3);
 	}
@@ -744,13 +756,12 @@ void ExchangeKey()
 	char* b = "02";
 	char* SB = CalculateS(b, BigToHexChars2(vy), hv);
 	//A.7
-	epoint* U = epoint_init();
-	U = CalculateU(tA, PB, xx2, RB);
+	epoint* U = CalculateU(tA, PB, xx2, RB);
 	big u = mirvar(0);
 	u = HexCharsToBig(ConvertStringAsHex(EpointToBytes(U)));
 	if (compare(u, mirvar(0)) == 0)
 	{
-		printf("计算错误\n");
+		printf("U计算错误\n");
 		system("pause");
 		exit(3);
 	}
@@ -763,10 +774,10 @@ void ExchangeKey()
 	KA = CalculateK(ux, uy, ZA, ZB);
 	//A.9
 	char* hu = CalculateH(BigToHexChars2(ux), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
-	char* S1 = CalculateS(b, BigToHexChars2(vy), hu);
+	char* S1 = CalculateS(b, BigToHexChars2(uy), hu);
 	if (compare(HexCharsToBig(S1), HexCharsToBig(SB)) != 0)
 	{
-		printf("计算错误\n");
+		printf("S1与SB计算错误\n");
 		system("pause");
 		exit(3);
 	}
@@ -777,7 +788,7 @@ void ExchangeKey()
 	char* S2 = CalculateS(c, BigToHexChars2(vy), hv);
 	if (compare(HexCharsToBig(S2), HexCharsToBig(SA)) != 0)
 	{
-		printf("计算错误\n");
+		printf("S2与SA计算错误\n");
 		system("pause");
 		exit(3);
 	}
@@ -813,7 +824,7 @@ epoint *CalculatePointR(big r)
 **********************************/
 big CalculateXX(big x) 
 {
-	double w1 = (logb2(HexCharsToBig(n)) / 2);
+	double w1 = logb2(HexCharsToBig(n)) / 2;
 	int w2 = (int)w1 - 1;
 	double precious = 0.0, inter = 0;
 	precious = modf(w1, &inter);
@@ -854,9 +865,9 @@ big CalculateK(big x, big y, char* ZA, char* ZB)
 	char* Z = (char*)calloc(strlen(ZA) + strlen(ZB) + 1, sizeof(char));
 	strcat(Z, ZA);
 	strcat(Z, ZB);
-	epoint* p = NewPoint(HexCharsToBig(ZA), HexCharsToBig(ZB));
+	epoint* p = NewPoint(HexCharsToBig(XY), HexCharsToBig(Z));
 	big k = mirvar(0);
-	k = KDF(p, 32);
+	k = KDF(p, fileData.size);   //或者32
 	return k;
 }
 

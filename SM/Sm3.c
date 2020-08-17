@@ -15,7 +15,7 @@ big SM3(big input)
 	big V = mirvar(0);
 	big one = mirvar(1);
 	unsigned int V0[8]; 		//V(0)为256比特初始值IV
-	big B[5];
+	big B[20];
 	int MLength;				//消息的长度
 	int BLength = 63;           //0~63，总共填充64个值
 	int length[64];				//消息长度的二进制表示 
@@ -25,7 +25,7 @@ big SM3(big input)
 	/*
 	初始化B[]
 	*/
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 20; i++)
 	{
 		B[i] = mirvar(0);
 	}  

@@ -32,7 +32,7 @@ String fileData;					//输入文件数据
 
 int main()
 {
-	mip = mirsys(1000, 16);
+	mip = mirsys(Max, 16);
 	ecurve_init(HexCharsToBig(a), HexCharsToBig(b), HexCharsToBig(p), MR_PROJECTIVE);	//初始化椭圆曲线内部参数
 
 	Encryption();
@@ -59,6 +59,8 @@ int main()
 
 	MakeSign();
 	VerifySign();
+
+	ExchangeKey();
 
 	system("pause");
 	return 0;

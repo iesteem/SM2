@@ -13,22 +13,22 @@ extern int Max;
 
 extern big k;						//随机数k，来自InitRandomK()
 
-extern big PBx;						//公钥x，来自CalculateBKeys()
-extern big PBy;						//公钥y，来自CalculateBKeys()
-extern big DB;						//私钥 ，来自CalculateBKeys()	
-extern big PAx;						//公钥x，来自CalculateAKeys()
-extern big PAy;						//公钥y，来自CalculateAKeys()
-extern big DA;						//私钥 ，来自CalculateAKeys()			
+extern big PBx;						//B公钥x
+extern big PBy;						//B公钥y
+extern big DB;						//B私钥 	
+extern big PAx;						//A公钥x
+extern big PAy;						//A公钥y
+extern big DA;						//A私钥		
 
-extern char* p;						//给定参数
-extern char* a;						//给定参数
-extern char* b;						//给定参数
-extern char* n;						//给定参数
-extern char* Gx;					//给定参数
-extern char* Gy;					//给定参数
+extern char* p;						//椭圆曲线参数
+extern char* a;						//
+extern char* b;						//
+extern char* n;						//
+extern char* Gx;					//
+extern char* Gy;					//
 
-extern char* ID;					//给定参数
-extern char* ENTL;					//给定参数
+extern char* ID;					//用户默认参数
+extern char* ENTL;					//
 
 extern int lengthC1x;				//C1的x长度
 extern int lengthC1y;				//C1的y长度
@@ -58,13 +58,13 @@ epoint *CalculatePA();				    //公钥PA(PAx,PAy)
 void ReadInputFile();				    //读取文件输入
 
 void Encryption();					    //加密
+void Decryption();					    //解密
 epoint *CalculatePoint1();			    //计算(x1,y1)
 epoint *CalculatePoint2();			    //计算(x2,y2)
 char *CalculateC1();				    //计算C1
 String *CalculateC2();				    //计算C2
 char* CalculateC3();				    //计算C3
 big KDF(epoint*, int);				    //计算t
-void Decryption();					    //解密
 
 void MakeSign();                        //制作签名
 void VerifySign();                      //验证签名
