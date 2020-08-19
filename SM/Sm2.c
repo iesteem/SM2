@@ -203,6 +203,7 @@ void InitRandomK()
 {
     k = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), k);	// 1<= k <= n-1
+	//printf("k = %s\n", BigToHexChars2(k));
 }
 
 /***********************
@@ -539,7 +540,6 @@ void MakeSign()
 	//1.+2.
 	big e = mirvar(0);
 	e = CalculateE();
-	//printf("e = %s\n", BigToHexChars2(e));
 Restart:
 	//3.
 	InitRandomK();	    //初始化随机数
@@ -551,21 +551,21 @@ Restart:
 	big r = mirvar(0);
 	r = Mod2(Add2(e, x1), HexCharsToBig(n));
 	//printf("r = %s\n", BigToHexChars2(r));
-	mirkill(x1);
 	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
 	{
 		printf("r计算出错\n");
 		goto Restart;
 	}
-	//6. 8********************************************************************************************
-	big s1 = mirvar(0);
-	big yd = mirvar(0);
-	xgcd(Add2(mirvar(1), DA), HexCharsToBig(n), s1, yd, mirvar(1));
-	//printf("s1=%s\n", BigToHexChars2(s1));
+	//6.
+	big s1 = Add2(mirvar(1), DA);
+	xgcd(s1, HexCharsToBig(n), s1, s1, s1);
+	//printf("s1 = %s\n", BigToHexChars2(s1));
 	big s2 = mirvar(0);
 	s2 = Mod2(Sub2(k, Multiply2(r, DA)), HexCharsToBig(n));
+	//printf("s2 = %s\n", BigToHexChars2(s2));
 	big s = mirvar(0);
 	s = Mod2(Multiply2(s1, s2), HexCharsToBig(n));
+	//printf("s = %s\n", BigToHexChars2(s));
 	if ((compare(s, mirvar(0)) == 0))
 	{
 		printf("s计算出错\n");
@@ -660,6 +660,9 @@ void CalculateAKeys()
 	PAx = PointX(pm);  //所得公钥横坐标存入全局变量PAx
 	PAy = PointY(pm);  //所得公钥横坐标存入全局变量PAx
 	DA = dm;           //所得私钥存入全局变量DA 
+	//printf("PAx = %s\n", BigToHexChars2(PAx));
+	//printf("PAy = %s\n", BigToHexChars2(PAy));
+	//printf("DA = %s\n", BigToHexChars2(DA));
 }
 
 /*
@@ -684,6 +687,7 @@ big CalculateE()
 	strcat(cM, ccode);
 	big E = mirvar(0);
 	E = HexCharsToBig(SM3ByHexStr(cM));
+	//printf("E = %s\n", BigToHexChars2(E));
 	return E;
 }
 

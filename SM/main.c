@@ -57,7 +57,7 @@ int main()
 	printf("Ç©Ãû:\n%s\n\n", sm3);
 	*/
 
-	//MakeSign();
+	MakeSign();
 	//VerifySign();
 
 	//ExchangeKey();
