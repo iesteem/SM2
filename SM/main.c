@@ -39,7 +39,7 @@ int main()
 	Decryption();
 
 
-	/*
+	/*  直接检查input文件中的字符数据的SM3摘要
 	ReadInputFile();
 	printf("输入字符数据为:\n%s\n\n", fileData.data);  //读入数据正确
 	printf("输入字符个数为:\n%d\n\n", fileData.size);  //读入个数正确
@@ -57,10 +57,10 @@ int main()
 	printf("签名:\n%s\n\n", sm3);
 	*/
 
-	MakeSign();
-	VerifySign();
+	//MakeSign();
+	//VerifySign();
 
-	ExchangeKey();
+	//ExchangeKey();
 
 	system("pause");
 	return 0;

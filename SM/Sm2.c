@@ -618,11 +618,11 @@ void VerifySign()
 	//3.+4.
 	big e = mirvar(0);
 	e = CalculateE();
-	printf("e = %s\n", BigToHexChars2(e));
+	//printf("e = %s\n", BigToHexChars2(e));
 	//5.
 	big t = mirvar(0);
 	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
-	printf("t = %s\n", BigToHexChars2(t));
+	//printf("t = %s\n", BigToHexChars2(t));
 	if (compare(t, mirvar(0)) == 0)
 	{
 		printf("t为0，验证不通过\n");
@@ -697,7 +697,7 @@ void ExchangeKey()
 	epoint* PB = CalculatePB();
 
 	//A.1
-	big ra = mirvar(0);
+	big ra =  (0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), ra);
 	//A.2
 	epoint* RA = MultiplyEpoint(ra, CalculateG());
