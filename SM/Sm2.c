@@ -594,23 +594,34 @@ void VerifySign()
 	*/
 	char* Rstring = GetPartHexStr(signature, 0, lengthRS);
 	char* Sstring = GetPartHexStr(signature, strlen(signature) - lengthRS, lengthRS);
-	free(signature);
-	//printf("r=%s\n\n", Rstring);
-	//printf("s=%s\n\n", Sstring);
 
 	//1.
-	int r = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
-	if (r != (-1))
+	int r1 = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
+	if (r1 != (-1))
 	{
-		printf("r验证不通过\n");
+		printf("r1验证不通过\n");
+		system("pause");
+		exit(1);
+	}
+	int r2 = compare(HexCharsToBig(Rstring), mirvar(0));
+	if (r2 != (+1))
+	{
+		printf("r2验证不通过\n");
 		system("pause");
 		exit(1);
 	}
 	//2.
-	int s = compare(HexCharsToBig(Sstring), HexCharsToBig(n));
-	if (s != (-1))
+	int s1 = compare(HexCharsToBig(Sstring), HexCharsToBig(n));
+	if (s1 != (-1))
 	{
-		printf("s验证不通过\n");
+		printf("s1验证不通过\n");
+		system("pause");
+		exit(1);
+	}
+	int s2 = compare(HexCharsToBig(Sstring), mirvar(0));
+	if (s2 != (+1))
+	{
+		printf("s2验证不通过\n");
 		system("pause");
 		exit(1);
 	}
@@ -618,7 +629,6 @@ void VerifySign()
 	//3.+4.
 	big e = mirvar(0);
 	e = CalculateE();
-	//printf("e = %s\n", BigToHexChars2(e));
 	//5.
 	big t = mirvar(0);
 	t = Mod2(Add2(HexCharsToBig(Rstring), HexCharsToBig(Sstring)), HexCharsToBig(n));
@@ -632,7 +642,9 @@ void VerifySign()
     //6.
 	epoint* G = CalculateG();
 	epoint* PA = CalculatePA();
-	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
+	epoint* point1 = MultiplyEpoint(HexCharsToBig(Sstring), G);
+	epoint* point2 = MultiplyEpoint(t, PA);
+	epoint* point = AddEpoint(point1, point2);
 	//7.
 	big x1 = mirvar(0);
 	x1 = PointX(point1);

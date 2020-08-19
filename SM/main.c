@@ -58,7 +58,7 @@ int main()
 	*/
 
 	MakeSign();
-	//VerifySign();
+	VerifySign();
 
 	//ExchangeKey();
 
