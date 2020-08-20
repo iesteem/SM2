@@ -214,6 +214,8 @@ epoint * CalculateG()
 	epoint *G = (epoint*)malloc(sizeof(epoint));
 	G = epoint_init();
 	epoint_set(HexCharsToBig(Gx), HexCharsToBig(Gy), 0, G);
+	//printf("Gx=%s\n\n", BigToHexChars2(PointX(G)));
+	//printf("Gy=%s\n\n", BigToHexChars2(PointY(G)));
 	return G;
 }
 
@@ -548,12 +550,17 @@ Restart:
 	//5.
 	big x1 = mirvar(0);
 	x1 = PointX(point1);
+	epoint_free(point1);
 	big r = mirvar(0);
 	r = Mod2(Add2(e, x1), HexCharsToBig(n));
 
-	/***************************************************************************************************/
-	epoint* G = CalculateG();
-	printf("Gx=%s\n\n", BigToHexChars2(PointX(G)));
+	//printf("PAx111111=%s\n\n", BigToHexChars2(PAx));
+	//printf("PAy111111=%s\n\n", BigToHexChars2(PAy));
+	epoint *PA = (epoint*)malloc(sizeof(epoint));
+	PA = epoint_init();
+	epoint_set(PAx, PAy, 0, PA);
+	//printf("PAx2222=%s\n\n", BigToHexChars2(PointX(PA)));
+	//printf("PAy2222=%s\n\n", BigToHexChars2(PointY(PA)));
 
 
 
@@ -648,6 +655,8 @@ void VerifySign()
 
 
 	epoint* PA = CalculatePA();
+	//printf("PAx2222=%s\n\n", BigToHexChars2(PointX(PA)));
+	//printf("PAy2222=%s\n\n", BigToHexChars2(PointY(PA)));
 	epoint* G = CalculateG();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
 
@@ -683,6 +692,7 @@ void CalculateAKeys()
 	PAx = PointX(pm);  //所得公钥横坐标存入全局变量PAx
 	PAy = PointY(pm);  //所得公钥横坐标存入全局变量PAx
 	DA = dm;           //所得私钥存入全局变量DA 
+	epoint_free(pm);
 	//printf("PAx = %s\n", BigToHexChars2(PAx));
 	//printf("PAy = %s\n", BigToHexChars2(PAy));
 	//printf("DA = %s\n", BigToHexChars2(DA));
