@@ -550,6 +550,13 @@ Restart:
 	x1 = PointX(point1);
 	big r = mirvar(0);
 	r = Mod2(Add2(e, x1), HexCharsToBig(n));
+
+	/***************************************************************************************************/
+	epoint* G = CalculateG();
+	printf("Gx=%s\n\n", BigToHexChars2(PointX(G)));
+
+
+
 	//printf("r = %s\n", BigToHexChars2(r));
 	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
 	{
@@ -571,7 +578,6 @@ Restart:
 		printf("s¼ÆËã³ö´í\n");
 		goto Restart;
 	}
-
 	/*
 	Æ´½Ó×Ö·û´®
 	*/
@@ -581,7 +587,6 @@ Restart:
 	signature = c;
 
 	printf("Ç©Ãû:\n%s\n\n", signature);  //Ç©Ãû
-
 }
 
 /*********************
@@ -595,8 +600,6 @@ void VerifySign()
 	char* Rstring = GetPartHexStr(signature, 0, lengthRS);
 	char* Sstring = GetPartHexStr(signature, strlen(signature) - lengthRS, lengthRS);
 	free(signature);
-	//printf("r=%s\n\n", Rstring);
-	//printf("s=%s\n\n", Sstring);
 
 	//1.
 	int r = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
@@ -630,8 +633,10 @@ void VerifySign()
 		exit(1);
 	}
     //6.
-	epoint* G = CalculateG();
+
+
 	epoint* PA = CalculatePA();
+	epoint* G = CalculateG();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
 	//7.
 	big x1 = mirvar(0);
@@ -644,6 +649,11 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
+
+
+
+
+
 }
 	
 
