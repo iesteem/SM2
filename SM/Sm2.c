@@ -550,19 +550,9 @@ Restart:
 	//5.
 	big x1 = mirvar(0);
 	x1 = PointX(point1);
-	epoint_free(point1);
+	//epoint_free(point1);
 	big r = mirvar(0);
 	r = Mod2(Add2(e, x1), HexCharsToBig(n));
-
-	//printf("PAx111111=%s\n\n", BigToHexChars2(PAx));
-	//printf("PAy111111=%s\n\n", BigToHexChars2(PAy));
-	epoint *PA = (epoint*)malloc(sizeof(epoint));
-	PA = epoint_init();
-	epoint_set(PAx, PAy, 0, PA);
-	//printf("PAx2222=%s\n\n", BigToHexChars2(PointX(PA)));
-	//printf("PAy2222=%s\n\n", BigToHexChars2(PointY(PA)));
-
-
 
 	//printf("r = %s\n", BigToHexChars2(r));
 	if ((compare(r, mirvar(0)) == 0) || (compare(Add2(r, k), HexCharsToBig(n)) == 0))
@@ -652,11 +642,22 @@ void VerifySign()
 		exit(1);
 	}
     //6.
+	/*
+	printf("Gx111=%s\n\n", Gx);
+	printf("Gy111=%s\n\n", Gy);
+	epoint *G = (epoint*)malloc(sizeof(epoint));
+	G = epoint_init();
+	BOOL flag = 1;
+	VerifyKeys(HexCharsToBig(Gx), HexCharsToBig(Gy));	//验证公钥和私钥
+	flag = epoint_set(HexCharsToBig(Gx), HexCharsToBig(Gy), 0, G);
+	printf("%d\n", flag);
+	printf("Gx222=%s\n\n", BigToHexChars2(PointX(G)));
+	printf("Gy222=%s\n\n", BigToHexChars2(PointY(G)));
+	*/
 
-
+	VerifyKeys(PAx, PAy);
+	VerifyKeys(HexCharsToBig(Gx), HexCharsToBig(Gy));
 	epoint* PA = CalculatePA();
-	//printf("PAx2222=%s\n\n", BigToHexChars2(PointX(PA)));
-	//printf("PAy2222=%s\n\n", BigToHexChars2(PointY(PA)));
 	epoint* G = CalculateG();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
 
@@ -671,6 +672,7 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
+	printf("验证通过\n");
 
 
 
@@ -685,17 +687,17 @@ void VerifySign()
 **************************************/
 void CalculateAKeys()
 {
-	big dm = mirvar(0);
-	dm = GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1)));	        // 私钥	[1,n-1]
-	epoint* pm = epoint_init();
-	pm = MultiplyEpoint(dm, CalculateG());										// 公钥 
-	PAx = PointX(pm);  //所得公钥横坐标存入全局变量PAx
-	PAy = PointY(pm);  //所得公钥横坐标存入全局变量PAx
-	DA = dm;           //所得私钥存入全局变量DA 
-	epoint_free(pm);
+	big dx = mirvar(0);
+	dx = GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1)));	        // 私钥	[1,n-1]
+	epoint* px = epoint_init();
+	px = MultiplyEpoint(dx, CalculateG());										// 公钥 
+	PAx = PointX(px);  //所得公钥横坐标存入全局变量PAx
+	PAy = PointY(px);  //所得公钥横坐标存入全局变量PAx
+	DA = dx;           //所得私钥存入全局变量DA 
+	epoint_free(px);
 	//printf("PAx = %s\n", BigToHexChars2(PAx));
 	//printf("PAy = %s\n", BigToHexChars2(PAy));
-	//printf("DA = %s\n", BigToHexChars2(DA));
+	//printf("DA  = %s\n", BigToHexChars2(DA));
 }
 
 /*
@@ -706,7 +708,7 @@ big CalculateE()
 	/*
 	拼接十六进制串
 	*/
-	char *c = (char*)calloc(strlen(ENTL) + strlen(ID) + strlen(a) + strlen(b) + strlen(Gx) + strlen(Gy) + strlen(BigToHexChars2(PBx)) + strlen(BigToHexChars2(PBy)) + 1, sizeof(char));  //完整十六进制串分配内存
+	char *c = (char*)calloc(strlen(ENTL) + strlen(ID) + strlen(a) + strlen(b) + strlen(Gx) + strlen(Gy) + strlen(BigToHexChars2(PAx)) + strlen(BigToHexChars2(PAy)) + 1, sizeof(char));  //完整十六进制串分配内存
 	strcat(c, ENTL);
 	strcat(c, ID);
 	strcat(c, a);
