@@ -596,7 +596,6 @@ void VerifySign()
 	*/
 	char* Rstring = GetPartHexStr(signature, 0, lengthRS);
 	char* Sstring = GetPartHexStr(signature, strlen(signature) - lengthRS, lengthRS);
-
 	//1.
 	int r1 = compare(HexCharsToBig(Rstring), HexCharsToBig(n));
 	if (r1 != (-1))
@@ -627,7 +626,6 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
-
 	//3.+4.
 	big e = mirvar(0);
 	e = CalculateE();
@@ -641,7 +639,6 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
-    //6.
 	/*
 	printf("Gx111=%s\n\n", Gx);
 	printf("Gy111=%s\n\n", Gy);
@@ -654,13 +651,12 @@ void VerifySign()
 	printf("Gx222=%s\n\n", BigToHexChars2(PointX(G)));
 	printf("Gy222=%s\n\n", BigToHexChars2(PointY(G)));
 	*/
-
+    //6.
 	VerifyKeys(PAx, PAy);
 	VerifyKeys(HexCharsToBig(Gx), HexCharsToBig(Gy));
 	epoint* PA = CalculatePA();
 	epoint* G = CalculateG();
 	epoint* point1 = AddEpoint(MultiplyEpoint(HexCharsToBig(Sstring), G), MultiplyEpoint(t, PA));
-
 	//7.
 	big x1 = mirvar(0);
 	x1 = PointX(point1);
@@ -672,12 +668,7 @@ void VerifySign()
 		system("pause");
 		exit(1);
 	}
-	printf("验证通过\n");
-
-
-
-
-
+	printf("验证通过\n\n");
 }
 	
 
@@ -729,14 +720,17 @@ big CalculateE()
 
 void ExchangeKey() 
 {
+	printf("***************密钥交换过程如下************\n");
 	//预处理：求PA,PB
+	VerifyKeys(HexCharsToBig(Gx), HexCharsToBig(Gy));
 	CalculateAKeys();
 	CalculateBKeys();
+	VerifyKeys(PAx, PAy);
+	VerifyKeys(PBx, PBy);
 	epoint* PA = CalculatePA();	
 	epoint* PB = CalculatePB();
-
 	//A.1
-	big ra =  (0);
+	big ra = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), ra);
 	//A.2
 	epoint* RA = MultiplyEpoint(ra, CalculateG());
@@ -766,14 +760,19 @@ void ExchangeKey()
 	//B.6
 	epoint* V = CalculateU(tB, PA, xx1, RA);
 	big v = mirvar(0);
-	v = HexCharsToBig(ConvertStringAsHex(EpointToBytes(V)));
+	v = HexCharsToBig(ConvertStringAsHex(EpointToBytes(V)));  //如何将点变换成十六进制串输出？
 	if (compare(v, mirvar(0)) == 0)
 	{
 		printf("V计算错误\n");
 		system("pause");
 		exit(3);
 	}
+	/*
 	//B.7
+	big KB = mirvar(0);
+	KB = CalculateK(vx, vy, ZA, ZB);
+	*/
+	//B.8
 	char* IDA = "31323334353637383132333435363738";    //默认ID
 	char* ENTLA = "0080";                              //默认ENTL
 	char* ZA = CalculateZ(ENTLA, IDA, BigToHexChars2(PAx), BigToHexChars2(PAy));
@@ -784,9 +783,6 @@ void ExchangeKey()
 	vx = PointX(V);
 	big vy = mirvar(0);
 	vy = PointY(V);
-	big KB = mirvar(0);
-	KB = CalculateK(vx, vy, ZA, ZB);
-	//B.8
 	big y1 = mirvar(0);
 	y1 = PointY(RA);
 	big y2 = mirvar(0);
@@ -794,6 +790,7 @@ void ExchangeKey()
 	char* hv = CalculateH(BigToHexChars2(vx), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
 	char* b = "02";
 	char* SB = CalculateS(b, BigToHexChars2(vy), hv);
+	printf("SB=%s\n",SB);
 	//A.7
 	epoint* U = CalculateU(tA, PB, xx2, RB);
 	big u = mirvar(0);
@@ -814,6 +811,7 @@ void ExchangeKey()
 	//A.9
 	char* hu = CalculateH(BigToHexChars2(ux), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
 	char* S1 = CalculateS(b, BigToHexChars2(uy), hu);
+	printf("S1=%s\n", S1);
 	if (compare(HexCharsToBig(S1), HexCharsToBig(SB)) != 0)
 	{
 		printf("S1与SB计算错误\n");
@@ -831,6 +829,7 @@ void ExchangeKey()
 		system("pause");
 		exit(3);
 	}
+	printf("计算成功\n");
 }
 
 /*

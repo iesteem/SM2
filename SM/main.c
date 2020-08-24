@@ -60,7 +60,7 @@ int main()
 	MakeSign();
 	VerifySign();
 
-	//ExchangeKey();
+	ExchangeKey();
 
 	system("pause");
 	return 0;

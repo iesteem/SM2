@@ -70,8 +70,8 @@ String* EpointToBytes(epoint *point)
 {
 	unsigned char *x = (unsigned char*)malloc(sizeof(unsigned char)*Max);
 	unsigned char *y = (unsigned char*)malloc(sizeof(unsigned char)*Max);
-	int lengthX = big_to_bytes(0, PointX(point), x, FALSE);  //字符串长度
-	int lengthY = big_to_bytes(0, PointY(point), y, FALSE);  //字符串长度
+	int lengthX = big_to_bytes(0, PointX(point), x, FALSE);  //字节长度
+	int lengthY = big_to_bytes(0, PointY(point), y, FALSE);  //字节长度
 
 	String *result = (String*)malloc(sizeof(String));
 	result->size = lengthX + lengthY + 1;  //String长度
