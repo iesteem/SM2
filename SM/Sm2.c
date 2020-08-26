@@ -721,7 +721,7 @@ big CalculateE()
 void ExchangeKey() 
 {
 	printf("***************密钥交换过程如下************\n");
-	//预处理：求PA,PB
+	//预处理：求PA,PB，ZA，ZB
 	VerifyKeys(HexCharsToBig(Gx), HexCharsToBig(Gy));
 	CalculateAKeys();
 	CalculateBKeys();
@@ -729,16 +729,30 @@ void ExchangeKey()
 	VerifyKeys(PBx, PBy);
 	epoint* PA = CalculatePA();	
 	epoint* PB = CalculatePB();
+	char* IDA = "31323334353637383132333435363738";    //默认IDA
+	char* ENTLA = "0080";                              //默认ENTLA
+	char* ZA = CalculateZ(ENTLA, IDA, BigToHexChars2(PAx), BigToHexChars2(PAy));
+	char* IDB = "31323334353637383132333435363738";    //默认IDB
+	char* ENTLB = "0080";                              //默认ENTLB
+	char* ZB = CalculateZ(ENTLB, IDB, BigToHexChars2(PBx), BigToHexChars2(PBy));
+	printf("ZA = %s\n", ZA);
+	printf("ZB = %s\n", ZB);
 	//A.1
 	big ra = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), ra);
+	printf("ra = %s\n", BigToHexChars2(ra));
 	//A.2
 	epoint* RA = MultiplyEpoint(ra, CalculateG());
+	printf("RAx = %s\n", BigToHexChars2(PointX(RA)));
+	//printf("RAy = %s\n", BigToHexChars2(PointY(RA)));
 	//B.1
 	big rb = mirvar(0);
 	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), rb);
+	printf("rb = %s\n", BigToHexChars2(rb));
 	//B.2
 	epoint* RB = MultiplyEpoint(rb, CalculateG());
+	printf("RBx = %s\n", BigToHexChars2(PointX(RB)));
+	//printf("RBy = %s\n", BigToHexChars2(PointY(RB)));
     //B.3
 	big x2 = mirvar(0);
 	x2 = PointX(RB);
@@ -773,12 +787,7 @@ void ExchangeKey()
 	KB = CalculateK(vx, vy, ZA, ZB);
 	*/
 	//B.8
-	char* IDA = "31323334353637383132333435363738";    //默认ID
-	char* ENTLA = "0080";                              //默认ENTL
-	char* ZA = CalculateZ(ENTLA, IDA, BigToHexChars2(PAx), BigToHexChars2(PAy));
-	char* IDB = "31323334353637383132333435363738";    //默认ID
-	char* ENTLB = "0080";                              //默认ENTL
-	char* ZB = CalculateZ(ENTLB, IDB, BigToHexChars2(PBx), BigToHexChars2(PBy));
+	
 	big vx = mirvar(0);
 	vx = PointX(V);
 	big vy = mirvar(0);
@@ -801,14 +810,16 @@ void ExchangeKey()
 		system("pause");
 		exit(3);
 	}
+	/*
 	//A.8
+	big KA = mirvar(0);
+	KA = CalculateK(ux, uy, ZA, ZB);
+	*/
+	//A.9
 	big ux = mirvar(0);
 	ux = PointX(U);
 	big uy = mirvar(0);
 	uy = PointY(U);
-	big KA = mirvar(0);
-	KA = CalculateK(ux, uy, ZA, ZB);
-	//A.9
 	char* hu = CalculateH(BigToHexChars2(ux), ZA, ZB, BigToHexChars2(x1), BigToHexChars2(y1), BigToHexChars2(x2), BigToHexChars2(y2));
 	char* S1 = CalculateS(b, BigToHexChars2(uy), hu);
 	printf("S1=%s\n", S1);
