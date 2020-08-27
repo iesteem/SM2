@@ -747,7 +747,7 @@ void ExchangeKey()
 	//printf("RAy = %s\n", BigToHexChars2(PointY(RA)));
 	//B.1
 	big rb = mirvar(0);
-	copy(GetBigRandom(mirvar(1), Sub2(HexCharsToBig(n), mirvar(1))), rb);
+	rb = Add2(ra, mirvar(1));
 	printf("rb = %s\n", BigToHexChars2(rb));
 	//B.2
 	epoint* RB = MultiplyEpoint(rb, CalculateG());
